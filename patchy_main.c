@@ -37,7 +37,10 @@ int main(void){ 	//This is only for testing so far.
 	if(parameters==NULL) return 1;
 	
 	loadParams(parameters);
-	printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\n",N,N1,N2,U0,M1,M2);
+	printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\n",N,N1,N2,U0,M1,M2,height,width);
+
+	long int seed=random_seed();
+	init_genrand((unsigned long)seed);
 
 	initParticles(particles);
 	return 0;

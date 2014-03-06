@@ -55,4 +55,12 @@ void loadParams(config_t *params){ //We are relying on the fact that params is a
 		printf("No valid value found for M2. Aborting.\n");
 		exit(1);
 	}
+	if(config_lookup_float(params,"height",&height) == CONFIG_FALSE){
+		printf("No valid value found for height. Aborting.\n");
+		exit(1);
+	}
+	if(config_lookup_float(params,"width",&width) == CONFIG_FALSE){
+		printf("No valid value found for width. Aborting.\n");
+		exit(1);
+	}
 }
