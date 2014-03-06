@@ -45,6 +45,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include "mt19937ar.h"
 
 /* Period parameters */  

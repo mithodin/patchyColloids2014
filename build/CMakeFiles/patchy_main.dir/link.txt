@@ -1,0 +1,1 @@
+/usr/bin/gcc   -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/patchy_main.dir/patchy_main.c.o CMakeFiles/patchy_main.dir/mt19937ar.c.o  -o ../bin/patchy_main  -L/Users/ltref/Documents/bachelor_project/libraries/lib -lconfig -lm 

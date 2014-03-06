@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/ltref/Documents/bachelor_project/code/mt19937ar.h
+
+/Users/ltref/Documents/bachelor_project/code/patchy_main.c
+math.h
+-
+stdio.h
+-
+stdlib.h
+-
+libconfig.h
+-
+mt19937ar.h
+/Users/ltref/Documents/bachelor_project/code/mt19937ar.h
+
+/Users/ltref/Documents/bachelor_project/libraries/include/libconfig.h
+stdio.h
+-
+
