@@ -1,1 +1,0 @@
-/Users/ltref/Documents/bachelor_project/code/build/CMakeFiles/patchy_main.dir
