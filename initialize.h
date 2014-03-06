@@ -1,0 +1,1 @@
+void initParticles(Colloid *);

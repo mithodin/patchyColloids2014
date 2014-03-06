@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <libconfig.h>
-#include "headers.h"
+#include "load_config.h"
+#include "parameters.h"
 
 config_t *getParams(void){ //loads the params from a file
 	config_t *parameters=malloc(sizeof(struct config_t));

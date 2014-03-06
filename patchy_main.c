@@ -11,8 +11,9 @@
 #include <libconfig.h> 	//We are using this to load our parameters from a file.
 
 #include "mt19937ar.h" 	//Generating random numbers
-#include "headers.h" 	//Global headers file
-#include "colloid.h"	//Define what is a colloid?
+#include "colloid.h" 	//What is a colloid?
+#include "initialize.h"	//Initialization
+#include "load_config.h" //Loading the configuration
 
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
@@ -28,6 +29,8 @@ int N2;
 double U0;
 const double M1 = 1;
 double M2;
+double height;
+double width;
 
 int main(void){ 	//This is only for testing so far.
 	parameters=getParams();
@@ -35,5 +38,7 @@ int main(void){ 	//This is only for testing so far.
 	
 	loadParams(parameters);
 	printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\n",N,N1,N2,U0,M1,M2);
+
+	initParticles(particles);
 	return 0;
 }
