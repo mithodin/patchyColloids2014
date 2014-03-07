@@ -37,11 +37,13 @@ int main(void){ 	//This is only for testing so far.
 	long int seed=random_seed();
 	init_genrand((unsigned long)seed);
 
+	particles=(Colloid *)malloc(sizeof(Colloid)*N);
 	initParticles(particles);
 	printf("Particles initialized\n");
 	int i=0;
 	while(i<N){
-		printf("%f ",particles[i].x);
+		printf("%f ",particles[i++].x);
+		fflush(stdout);
 	}
 	printf("\n");
 	printColloidsSortedX(particles);
