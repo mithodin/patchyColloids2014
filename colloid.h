@@ -13,9 +13,14 @@ struct colloid {
 
 typedef struct colloid Colloid;
 
+void newColloid(species, Colloid *);
 void insertSortedX(Colloid *list, Colloid *newitem);
 void insertSortedZ(Colloid *list, Colloid *newitem);
 void insertLeft(Colloid *list, Colloid *newitem);
 void insertRight(Colloid *list, Colloid *newitem);
-void newColloid(species, Colloid *);
+void insertBelow(Colloid *list, Colloid *newitem);
+void insertAbove(Colloid *list, Colloid *newitem);
 void printColloidsSortedX(Colloid *);
+void printColloidsSortedZ(Colloid *);
+void makePeriodicX(Colloid *);
+void makePeriodicZ(Colloid *);

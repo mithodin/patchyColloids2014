@@ -23,10 +23,13 @@ void initParticles(Colloid *particles){
 			}
 			if(i>0){
 				insertSortedX(&particles[i-1], this);
+				insertSortedZ(&particles[i-1], this);
 			}
 			 ++i;
 		}
 	}
+	makePeriodicX(particles);
+	makePeriodicZ(particles);
 }
 
 int noCollision(int i, double x, double z, Colloid *particles){

@@ -40,12 +40,7 @@ int main(void){ 	//This is only for testing so far.
 	particles=(Colloid *)malloc(sizeof(Colloid)*N);
 	initParticles(particles);
 	printf("Particles initialized\n");
-	int i=0;
-	while(i<N){
-		printf("%f ",particles[i++].x);
-		fflush(stdout);
-	}
-	printf("\n");
 	printColloidsSortedX(particles);
+	printColloidsSortedZ(particles);
 	return 0;
 }
