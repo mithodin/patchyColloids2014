@@ -8,12 +8,16 @@ config_t *getParams(void){ //loads the params from a file
 
 	FILE *paramFile = fopen("parameters.cfg","r");
 	if(paramFile == NULL){
-		return NULL;
+		printf("Error: No file 'parameters.cfg' in 'bin' directory\n");
+		exit(1);
 	}
 
 	config_init(parameters);
 	if(config_read(parameters, paramFile)) return parameters;
-	return NULL;
+	else{
+		printf("Error loading parameters file. Check syntax.\n");
+		exit(1);
+	}
 }
 
 //Maybe I will extend this to handle arrays of parameters.

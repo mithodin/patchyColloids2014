@@ -74,6 +74,37 @@ void makePeriodicX(Colloid *list){
 	(*last).right = first;
 }
 
+void reSortX(Colloid *list){ //Point to the changed element!
+	while( (*list).x > (*(*list).right).x && (*(*list).right).x > (*(*list).left).x ){
+		swapRight(list);
+	}
+	while( (*list).x < (*(*list).left).x && (*(*list).right).x > (*(*list).left).x ){
+		swapLeft(list);
+	}
+}
+
+void swapRight(Colloid *list){
+	Colloid *curRight = (*list).right;
+	Colloid *curLeft = (*list).left;
+	(*list).right = (*curRight).right;
+	(*list).left = curRight;
+	(*curLeft).right = curRight;
+	(*(*curRight).right).left = list;
+	(*curRight).left = curLeft;
+	(*curRight).right = list;
+}
+
+void swapLeft(Colloid *list){
+	Colloid *curRight = (*list).right;
+	Colloid *curLeft = (*list).left;
+	(*list).left = (*curLeft).left;
+	(*list).right = curLeft;
+	(*(*curLeft).left).right = list;
+	(*curRight).left = curLeft;
+	(*curLeft).right = curRight;
+	(*curLeft).left = list;
+}
+
 //For z direction
 void insertSortedZ(Colloid *list, Colloid *newitem){ //DO NOT USE WHEN DLL HAS BEEN MADE PERIODIC!
 	while( (*list).below && (*(*list).below).z > (*newitem).z ){
@@ -116,9 +147,9 @@ void printColloidsSortedZ(Colloid *list){
 	}
 	do {
 		if( (*list).sp == THREEPATCH ){
-			printf("(%f) ",(*list).x);
+			printf("(%f) ",(*list).z);
 		}else{
-			printf("[%f] ",(*list).x);
+			printf("[%f] ",(*list).z);
 		}
 		list = (*list).above;
 	}while( list && (*(*list).below).z < (*list).z );
@@ -156,4 +187,15 @@ void swapUp(Colloid *list){
 	(*(*curAbove).above).below = list;
 	(*curAbove).below = curBelow;
 	(*curAbove).above = list;
+}
+
+void swapDown(Colloid *list){
+	Colloid *curAbove = (*list).above;
+	Colloid *curBelow = (*list).below;
+	(*list).below = (*curBelow).below;
+	(*list).above = curBelow;
+	(*(*curBelow).below).above = list;
+	(*curAbove).below = curBelow;
+	(*curBelow).above = curAbove;
+	(*curBelow).below = list;
 }

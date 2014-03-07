@@ -14,7 +14,7 @@ void initParticles(Colloid *particles){
 		particles[i].x = genrand_real2()*width;
 		particles[i].z = genrand_real2()*height;
 		particles[i].a = genrand_real2()*2*M_PI;
-		if(noCollision(i,particles[i].x,particles[i].z,particles)){
+		if(noCollision(i,particles)){
 			this = &particles[i];
 			if(i<N1){
 				newColloid(THREEPATCH,this);
@@ -25,18 +25,22 @@ void initParticles(Colloid *particles){
 				insertSortedX(&particles[i-1], this);
 				insertSortedZ(&particles[i-1], this);
 			}
-			 ++i;
+			i+=1;
 		}
 	}
 	makePeriodicX(particles);
 	makePeriodicZ(particles);
 }
 
-int noCollision(int i, double x, double z, Colloid *particles){
+int noCollision(int i, Colloid *particles){
+	double x = particles[i].x;
+	double z = particles[i].z;
+	double xj = 0, zj = 0;
 	int j=0;
-	for(j=0;j<N;j++){
-		if(j==i) continue;
-		if(distance(x,z,particles[j].x,particles[j].z) <= 1.0) return 0;
+	for(j=0;j<i;j++){
+		xj = particles[j].x;
+		zj = particles[j].z;
+		if(distance(x,z,xj,zj) < 1.0) return 0;
 	}
 	return 1;
 }

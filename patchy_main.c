@@ -27,6 +27,11 @@ double M2;
 double height;
 double width;
 
+double Utot = 0; //Total Energy
+double sigma = 1; //MC trial standard deviation
+
+void printPositions(void);
+
 int main(void){ 	//This is only for testing so far.
 	parameters=getParams();
 	if(parameters==NULL) return 1;
@@ -40,7 +45,19 @@ int main(void){ 	//This is only for testing so far.
 	particles=(Colloid *)malloc(sizeof(Colloid)*N);
 	initParticles(particles);
 	printf("Particles initialized\n");
-	printColloidsSortedX(particles);
-	printColloidsSortedZ(particles);
+	//printColloidsSortedX(particles);
+	//printColloidsSortedZ(particles);
+	
+	printPositions();
 	return 0;
+}
+
+void printPositions(void){
+	FILE *posFile = fopen("positions.dat","w");
+	int i=0;
+	fprintf(posFile,"#x\tz\tangle\tspecies (3patch: %d)\n",THREEPATCH);
+	for(i=0;i<N;i++){
+		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
+	}
+	fclose(posFile);
 }
