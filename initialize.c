@@ -9,11 +9,24 @@
 void initParticles(Colloid *particles){
 	particles=malloc(sizeof(Colloid)*N);
 	int i=0;
+	Colloid *tmp = NULL;
+	Colloid *this = NULL;
 	while(i<N){
 		particles[i].x = genrand_real2()*width;
 		particles[i].z = genrand_real2()*height;
 		particles[i].a = genrand_real2()*2*M_PI;
-		if(noCollision(i,particles[i].x,particles[i].z,particles)) ++i;
+		if(noCollision(i,particles[i].x,particles[i].z,particles)){
+			this = &particles[i];
+			if(i<N1){
+				newColloid(THREEPATCH,this);
+			}else{
+				newColloid(TWOPATCH,this);
+			}
+			if(i>0){
+				insertSortedX(&particles[i-1], this);
+			}
+			 ++i;
+		}
 	}
 }
 

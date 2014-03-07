@@ -18,11 +18,6 @@
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
 
-/* No need to use these so far:
-Colloid *pSortedX;	//particles sorted by x coordinate
-Colloid *pSortedZ;	//particles sorted by z coordinate
-*/
-
 int N;
 int N1;
 int N2;
@@ -43,5 +38,12 @@ int main(void){ 	//This is only for testing so far.
 	init_genrand((unsigned long)seed);
 
 	initParticles(particles);
+	printf("Particles initialized\n");
+	int i=0;
+	while(i<N){
+		printf("%f ",particles[i].x);
+	}
+	printf("\n");
+	printColloidsSortedX(particles);
 	return 0;
 }
