@@ -4,7 +4,7 @@
 #include "parameters.h"
 
 config_t *getParams(void){ //loads the params from a file
-	config_t *parameters=malloc(sizeof(struct config_t));
+	config_t *parameters=(struct config_t*)malloc(sizeof(struct config_t));
 
 	FILE *paramFile = fopen("parameters.cfg","r");
 	if(paramFile == NULL){

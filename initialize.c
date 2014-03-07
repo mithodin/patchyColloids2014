@@ -7,7 +7,7 @@
 #include "initialize.h"
 
 void initParticles(Colloid *particles){
-	particles=malloc(sizeof(Colloid)*N);
+	particles=(Colloid *)malloc(sizeof(Colloid)*N);
 	int i=0;
 	Colloid *tmp = NULL;
 	Colloid *this = NULL;
