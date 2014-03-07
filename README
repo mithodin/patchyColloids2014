@@ -1,0 +1,8 @@
+How to build:
+ * Install libconfig development files (libconfig-dev package for debian)
+ * Install cmake
+ * Create a directory 'build' within this source directory
+ * Descend into 'build' and execute 'cmake ..'
+ * Then execute 'make'
+
+You should now have an executable 'patchy_main' in the 'bin' folder.
