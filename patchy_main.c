@@ -14,6 +14,7 @@
 #include "colloid.h" 	//What is a colloid?
 #include "initialize.h"	//Initialization
 #include "load_config.h" //Loading the configuration
+#include "monte_carlo.h"
 
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
@@ -26,9 +27,10 @@ const double M1 = 1;
 double M2;
 double height;
 double width;
+const double delta = 0.25; //Patch diameter
+const double sigma = 1.0; //Colloid diameter
 
 double Utot = 0; //Total Energy
-double sigma = 1; //MC trial standard deviation
 
 void printPositions(void);
 
@@ -47,6 +49,8 @@ int main(void){ 	//This is only for testing so far.
 	printf("Particles initialized\n");
 	//printColloidsSortedX(particles);
 	//printColloidsSortedZ(particles);
+	Utot = totalEnergy(particles);
+	printf("Total Energy: %f\n",Utot);
 	
 	printPositions();
 	return 0;

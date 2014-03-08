@@ -17,3 +17,13 @@ double realX(double x){
 double realZ(double z){
 	return z-floor(z/height)*height;
 }
+
+double realDx(double dx){
+	dx -= round(dx / width) * width;
+	return dx;
+}
+
+double realDz(double dz){
+	dz -= round(dz / height) * height;
+	return dz;
+}

@@ -7,3 +7,5 @@ extern const double M1; //m1 is always 1
 extern double M2; //in units of m1
 extern double height;
 extern double width;
+extern const double delta;
+extern const double sigma;

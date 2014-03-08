@@ -30,3 +30,9 @@ void swapUp(Colloid *);
 void swapDown(Colloid *);
 void reSortX(Colloid *);
 void reSortZ(Colloid *);
+
+double colloidDistance(Colloid *, Colloid *);
+double patchPositionX(Colloid *, int);
+double patchPositionZ(Colloid *, int);
+int patches(Colloid *);
+double pairInteraction(Colloid *, Colloid *);

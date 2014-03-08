@@ -193,12 +193,12 @@ unsigned long int random_seed(void)
 	if ((devrandom = fopen("/dev/random","r")) == NULL)
 	{
 		seed=(unsigned int)time(0l);
-		printf("Got seed %u from time()\n",seed);
+		//printf("Got seed %u from time()\n",seed);
 	}
 	else
 	{
 		fread(&seed,sizeof(seed),1,devrandom);
-		printf("Got seed %u from /dev/random\n",seed);
+		//printf("Got seed %u from /dev/random\n",seed);
 		fclose(devrandom);
 	}
 	

@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "colloid.h"
+#include "parameters.h"
+#include "distance.h"
 
 void newColloid(species sp, Colloid *col){
 	(*col).left = NULL;
@@ -198,4 +201,60 @@ void swapDown(Colloid *list){
 	(*curAbove).below = curBelow;
 	(*curBelow).above = curAbove;
 	(*curBelow).below = list;
+}
+
+double pairInteraction(Colloid *c1, Colloid *c2){
+	double d = colloidDistance(c1,c2);
+	if(d > sigma+delta){ return 0; }
+	else if(d < sigma ){ return 1.0/0.0; } //return inf for overlapping colloids.
+	else{
+		int i = 0;
+		int j = 0;
+		for(i = 0; i < patches(c1); i++){
+			for( j = 0; j < patches(c2); j++ ){
+				double p1X = patchPositionX(c1,i);
+				double p1Z = patchPositionZ(c1,i);
+				double p2X = patchPositionX(c2,j);
+				double p2Z = patchPositionZ(c2,j);
+				
+				d = distance(p1X,p1Z,p2X,p2Z);
+				if( d <= delta ){
+					return U0;
+				}
+			}
+		}
+		return 0;
+	}
+}
+
+double colloidDistance(Colloid *c1, Colloid *c2){
+	return distance((*c1).x,(*c1).z,(*c2).x,(*c2).z);
+}
+
+double patchPositionX(Colloid *c, int which){
+	if( (*c).sp == THREEPATCH ){
+		return (*c).x + sigma/2.0*cos((*c).a + (which%3)*2.0/3.0*M_PI);
+	}else if( (*c).sp == TWOPATCH ){
+		return (*c).x + sigma/2.0*cos((*c).a + (which%2)*M_PI);
+	}else{
+		return -1; //ERROR!
+	}
+}
+
+double patchPositionZ(Colloid *c, int which){
+	if( (*c).sp == THREEPATCH ){
+		return (*c).z + sigma/2.0*sin((*c).a + (which%3)*2.0/3.0*M_PI);
+	}else if( (*c).sp == TWOPATCH ){
+		return (*c).z + sigma/2.0*sin((*c).a + (which%2)*M_PI);
+	}else{
+		return -1; //ERROR!
+	}
+}
+
+int patches(Colloid *c){
+	switch( (*c).sp ){
+		case THREEPATCH: return 3; break;
+		case TWOPATCH: return 2; break;
+		default: return 0;
+	}
 }
