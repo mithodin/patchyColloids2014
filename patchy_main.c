@@ -27,6 +27,7 @@ const double M1 = 1;
 double M2;
 double height;
 double width;
+double T;
 const double delta = 0.25; //Patch diameter
 const double sigma = 1.0; //Colloid diameter
 
@@ -39,7 +40,7 @@ int main(void){ 	//This is only for testing so far.
 	if(parameters==NULL) return 1;
 	
 	loadParams(parameters);
-	printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\n",N,N1,N2,U0,M1,M2,height,width);
+	printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\n",N,N1,N2,U0,M1,M2,height,width,T);
 
 	long int seed=random_seed();
 	init_genrand((unsigned long)seed);
@@ -51,6 +52,9 @@ int main(void){ 	//This is only for testing so far.
 	//printColloidsSortedZ(particles);
 	Utot = totalEnergy(particles);
 	printf("Total Energy: %f\n",Utot);
+
+	double pacc=monteCarloSteps(particles,10000);
+	printf("Acceptance rate: %f\n",pacc);
 	
 	printPositions();
 	return 0;

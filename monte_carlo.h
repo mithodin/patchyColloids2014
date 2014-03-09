@@ -1,5 +1,7 @@
 double extPotential(Colloid *);
-double pairPotential(Colloid *);
+double pairPotential(Colloid *, int*);
 double totalEnergy(Colloid *);
-void monteCarloStep(Colloid *);
-void monteCarloSteps(Colloid *, int);
+double monteCarloStep(Colloid *);
+double monteCarloSteps(Colloid *, int);
+double deltaU(Colloid*, double, double, double, int*);
+int accept(double);

@@ -10,6 +10,8 @@ void newColloid(species sp, Colloid *col){
 	(*col).right = NULL;
 	(*col).above = NULL;
 	(*col).below = NULL;
+	(*col).vext = 0;
+	(*col).vint = 0;
 	(*col).sp = sp;
 }
 
@@ -203,10 +205,14 @@ void swapDown(Colloid *list){
 	(*curBelow).below = list;
 }
 
-double pairInteraction(Colloid *c1, Colloid *c2){
+double pairInteraction(Colloid *c1, Colloid *c2, int* collision){
 	double d = colloidDistance(c1,c2);
+	*collision = 0;
 	if(d > sigma+delta){ return 0; }
-	else if(d < sigma ){ return 1.0/0.0; } //return inf for overlapping colloids.
+	else if(d < sigma ){ 
+		*collision = 1;
+		return 1.0/0.0;
+	} //return inf for overlapping colloids.
 	else{
 		int i = 0;
 		int j = 0;

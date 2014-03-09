@@ -67,4 +67,8 @@ void loadParams(config_t *params){ //We are relying on the fact that params is a
 		printf("No valid value found for width. Aborting.\n");
 		exit(1);
 	}
+	if(config_lookup_float(params,"T",&T) == CONFIG_FALSE){
+		printf("No valid value found for T. Aborting.\n");
+		exit(1); //We need this value!
+	}
 }

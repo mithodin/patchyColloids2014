@@ -4,6 +4,8 @@ struct colloid {
 	double x; //Coordinates
 	double z;
 	double a;
+	double vext; //current external energy
+	double vint; //current internal energy
 	species sp; //what species?
 	struct colloid *left; //Keeps a sorted double linked list in x-direction
 	struct colloid *right;
@@ -35,4 +37,4 @@ double colloidDistance(Colloid *, Colloid *);
 double patchPositionX(Colloid *, int);
 double patchPositionZ(Colloid *, int);
 int patches(Colloid *);
-double pairInteraction(Colloid *, Colloid *);
+double pairInteraction(Colloid *, Colloid *, int *);
