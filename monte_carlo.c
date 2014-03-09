@@ -8,7 +8,7 @@
 double dmax = 1.0; //completely random numbers
 double amax = 2.0/3.0*M_PI;
 
-double extPotential(double x, double z){
+double extPotential(Colloid *c){
 	return 0;
 }
 
@@ -39,7 +39,7 @@ double totalEnergy(Colloid *carray){ //Give an Array here!
 	double uint = 0;
 	int i = 0;
 	for(i = 0;i < N; ++i){
-		uext += extPotential(carray[i].x, carray[i].z);
+		uext += extPotential(&carray[i]);
 		uint += pairPotential(&carray[i]);
 	}
 	utot = uext + uint/2.0;
@@ -56,5 +56,13 @@ void monteCarloStep(Colloid *carray){
 void monteCarloSteps(Colloid *carray, int howmany){
 	for(; howmany > 0; --howmany){
 		monteCarloStep(carray);
+	}
+}
+
+int accept(double du){
+	if( du < 0 ) return 1;
+	else{
+		double paccept = exp(-du/T);
+		//TODO
 	}
 }
