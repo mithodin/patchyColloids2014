@@ -22,13 +22,13 @@ Colloid *particles;	//holds all the particles
 int N;
 int N1;
 int N2;
-double U0;
 const double M1 = 1;
 double M2;
 double height;
 double width;
 double T;
-const double delta = 0.25; //Patch diameter
+const double U0 = 1;
+const double delta = 0.119; //Patch diameter
 const double sigma = 1.0; //Colloid diameter
 
 double Utot = 0; //Total Energy
@@ -53,10 +53,16 @@ int main(void){ 	//This is only for testing so far.
 	Utot = totalEnergy(particles);
 	printf("Total Energy: %f\n",Utot);
 
-	double pacc=monteCarloSteps(particles,10000);
-	printf("Acceptance rate: %f\n",pacc);
+	initDmax(particles);
+
+	double pacc=monteCarloSteps(particles,50000);
+	printf("Overall acceptance rate: %f\n",pacc);
 	
+	Utot = totalEnergy(particles);
+	printf("Total Energy: %f\n",Utot);
 	printPositions();
+
+	if(collisions(particles)) printf("Collision detected!\n");
 	return 0;
 }
 

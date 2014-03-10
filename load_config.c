@@ -51,10 +51,6 @@ void loadParams(config_t *params){ //We are relying on the fact that params is a
 		printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
 		exit(1);
 	}
-	if(config_lookup_float(params,"U0",&U0) == CONFIG_FALSE){
-		printf("No valid value found for U0. Aborting.\n");
-		exit(1); //We need this value!
-	}
 	if(config_lookup_float(params,"M2",&M2) == CONFIG_FALSE){
 		printf("No valid value found for M2. Aborting.\n");
 		exit(1);

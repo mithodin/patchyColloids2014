@@ -1,7 +1,7 @@
-height = 20
-width = 20
+height = 50
+width = 40
 coldiameter = 1.0
-patchdiameter = 0.25
+patchdiameter = 0.119
 
 set samples 5000
 set xrange [-1:1+width]
@@ -61,4 +61,4 @@ plot "positions.dat" u 1:2:(coldiameter/2.0):($4*2+1) with circles lc variable f
      "positions.dat" u ($1+cos($3)/2):($2-height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
      "positions.dat" u ($1+$4*cos($3+2.0/3.0*pi)/2):($2-height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
      "positions.dat" u ($1+$4*cos($3+4.0/3.0*pi)/2):($2-height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     "positions.dat" u ($1+(1-$4)*cos($3+pi)/2):($2-height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
+     "positions.dat" u ($1+(1-$4)*cos($3+pi)/2):($2-height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle

@@ -38,3 +38,4 @@ double patchPositionX(Colloid *, int);
 double patchPositionZ(Colloid *, int);
 int patches(Colloid *);
 double pairInteraction(Colloid *, Colloid *, int *);
+int collisions(Colloid *);

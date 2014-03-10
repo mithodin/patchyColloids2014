@@ -80,10 +80,10 @@ void makePeriodicX(Colloid *list){
 }
 
 void reSortX(Colloid *list){ //Point to the changed element!
-	while( (*list).x > (*(*list).right).x && (*(*list).right).x > (*(*list).left).x ){
+	while( realDx( (*list).x - (*(*list).right).x ) > 0 ){
 		swapRight(list);
 	}
-	while( (*list).x < (*(*list).left).x && (*(*list).right).x > (*(*list).left).x ){
+	while( realDx( (*list).x - (*(*list).left).x ) < 0 ){
 		swapLeft(list);
 	}
 }
@@ -205,14 +205,14 @@ void swapDown(Colloid *list){
 	(*curBelow).below = list;
 }
 
-double pairInteraction(Colloid *c1, Colloid *c2, int* collision){
+double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
 	double d = colloidDistance(c1,c2);
 	*collision = 0;
-	if(d > sigma+delta){ return 0; }
+	if(d > sigma+delta){ return 0.0; }
 	else if(d < sigma ){ 
 		*collision = 1;
-		return 1.0/0.0;
-	} //return inf for overlapping colloids.
+		return 0.0;
+	}
 	else{
 		int i = 0;
 		int j = 0;
@@ -225,7 +225,7 @@ double pairInteraction(Colloid *c1, Colloid *c2, int* collision){
 				
 				d = distance(p1X,p1Z,p2X,p2Z);
 				if( d <= delta ){
-					return U0;
+					return -U0;
 				}
 			}
 		}
@@ -263,4 +263,16 @@ int patches(Colloid *c){
 		case TWOPATCH: return 2; break;
 		default: return 0;
 	}
+}
+
+int collisions(Colloid *carray){
+	int i=0,j=0;
+	for(i = 0; i<N; ++i){
+		for(j = i+1; j < N; j++){
+			if(colloidDistance(&carray[i], &carray[j]) < sigma ){
+				return 1;
+			}
+		}
+	}
+	return 0;
 }
