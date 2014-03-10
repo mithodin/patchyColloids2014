@@ -3,8 +3,15 @@
 #include "load_config.h"
 #include "parameters.h"
 
+config_t *parameters;
+int loaded = 0;
+config_setting_t *temperature;
+int t_length = 0;
+
+extern char fn[40];
+
 config_t *getParams(void){ //loads the params from a file
-	config_t *parameters=(struct config_t*)malloc(sizeof(struct config_t));
+	parameters=(struct config_t*)malloc(sizeof(struct config_t));
 
 	FILE *paramFile = fopen("parameters.cfg","r");
 	if(paramFile == NULL){
@@ -21,50 +28,67 @@ config_t *getParams(void){ //loads the params from a file
 }
 
 //Maybe I will extend this to handle arrays of parameters.
-void loadParams(config_t *params){ //We are relying on the fact that params is a valid config_t pointer
-	if(config_lookup_int(params,"N",&N) == CONFIG_FALSE) N = -1;
-	if(config_lookup_int(params,"N1",&N1) == CONFIG_FALSE) N1 = -1;
-	if(config_lookup_int(params,"N2",&N2) == CONFIG_FALSE) N2 = -1;
+int loadParams(){ //We are relying on the fact that params is a valid config_t pointer
+	if(!loaded){
+		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE) N = -1;
+		if(config_lookup_int(parameters,"N1",&N1) == CONFIG_FALSE) N1 = -1;
+		if(config_lookup_int(parameters,"N2",&N2) == CONFIG_FALSE) N2 = -1;
 
-	if(N == -1){
-		if(N1 == -1 || N2 == -1){
+		if(N == -1){
+			if(N1 == -1 || N2 == -1){
+				printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+				return 0;
+			}else{
+				N = N1+N2;
+			}
+		}else if(N1 == -1){
+			if(N2 == -1 || N < N2){
+				printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+				return 0;
+			}else{
+				N1 = N-N2;
+			}
+		}else if(N2 == -1){
+			if(N < N1){
+				printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+				return 0;
+			}else{
+				N2 = N-N1;
+			}
+		}else if(N != N1+N2){
 			printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
-			exit(1);
-		}else{
-			N = N1+N2;
+			return 0;
 		}
-	}else if(N1 == -1){
-		if(N2 == -1 || N < N2){
-			printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
-			exit(1);
-		}else{
-			N1 = N-N2;
+		if(config_lookup_float(parameters,"M2",&M2) == CONFIG_FALSE){
+			printf("No valid value found for M2. Aborting.\n");
+			return 0;
 		}
-	}else if(N2 == -1){
-		if(N < N1){
-			printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
-			exit(1);
-		}else{
-			N2 = N-N1;
+		if(config_lookup_float(parameters,"height",&height) == CONFIG_FALSE){
+			printf("No valid value found for height. Aborting.\n");
+			return 0;
 		}
-	}else if(N != N1+N2){
-		printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
-		exit(1);
+		if(config_lookup_float(parameters,"width",&width) == CONFIG_FALSE){
+			printf("No valid value found for width. Aborting.\n");
+			return 0;
+		}
+		if(config_lookup_float(parameters,"T",&T) == CONFIG_FALSE){
+			temperature = config_lookup(parameters,"T");
+			if(temperature == NULL){
+				printf("No valid value found for T. Aborting.\n");
+				return 0;
+			}else{
+				T = config_setting_get_float_elem(temperature, loaded);
+				t_length = config_setting_length(temperature);
+			}
+		}
+		sprintf(fn,"positions-T%d.dat",loaded);
+		loaded = 1;
+		return 1;
+	}else if(loaded < t_length){
+		T = config_setting_get_float_elem(temperature, loaded);
+		sprintf(fn,"positions-T%d.dat",loaded);
+		++loaded;
+		return 1;
 	}
-	if(config_lookup_float(params,"M2",&M2) == CONFIG_FALSE){
-		printf("No valid value found for M2. Aborting.\n");
-		exit(1);
-	}
-	if(config_lookup_float(params,"height",&height) == CONFIG_FALSE){
-		printf("No valid value found for height. Aborting.\n");
-		exit(1);
-	}
-	if(config_lookup_float(params,"width",&width) == CONFIG_FALSE){
-		printf("No valid value found for width. Aborting.\n");
-		exit(1);
-	}
-	if(config_lookup_float(params,"T",&T) == CONFIG_FALSE){
-		printf("No valid value found for T. Aborting.\n");
-		exit(1); //We need this value!
-	}
+	return 0;
 }

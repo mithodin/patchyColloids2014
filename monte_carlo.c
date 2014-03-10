@@ -7,7 +7,7 @@
 #include "mt19937ar.h"
 
 const double paccept = 0.6;
-double dmax = 5; //completely random numbers
+double dmax = 2; //completely random numbers
 double amax = 2.0/3.0*M_PI;
 
 double extPotential(Colloid *c){

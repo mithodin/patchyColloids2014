@@ -33,42 +33,46 @@ const double sigma = 1.0; //Colloid diameter
 
 double Utot = 0; //Total Energy
 
+char fn[40];
+
 void printPositions(void);
 
 int main(void){ 	//This is only for testing so far.
 	parameters=getParams();
 	if(parameters==NULL) return 1;
 	
-	loadParams(parameters);
-	printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\n",N,N1,N2,U0,M1,M2,height,width,T);
+	while(loadParams()){;
+		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\n",N,N1,N2,U0,M1,M2,height,width,T);
 
-	long int seed=random_seed();
-	init_genrand((unsigned long)seed);
+		long int seed=random_seed();
+		init_genrand((unsigned long)seed);
 
-	particles=(Colloid *)malloc(sizeof(Colloid)*N);
-	initParticles(particles);
-	printf("Particles initialized\n");
-	//printColloidsSortedX(particles);
-	//printColloidsSortedZ(particles);
-	Utot = totalEnergy(particles);
-	printf("Total Energy: %f\n",Utot);
+		particles=(Colloid *)malloc(sizeof(Colloid)*N);
+		initParticles(particles);
+		printf("Particles initialized\n");
+		//printColloidsSortedX(particles);
+		//printColloidsSortedZ(particles);
+		Utot = totalEnergy(particles);
+		printf("Total Energy: %f\n",Utot);
 
-	initDmax(particles);
+		initDmax(particles);
 
-	double pacc=monteCarloSteps(particles,50000);
-	printf("Overall acceptance rate: %f\n",pacc);
-	
-	Utot = totalEnergy(particles);
-	printf("Total Energy: %f\n",Utot);
-	printPositions();
+		double pacc=monteCarloSteps(particles,100000);
+		printf("Overall acceptance rate: %f\n",pacc);
 
-	if(collisions(particles)) printf("Collision detected!\n");
+		Utot = totalEnergy(particles);
+		printf("Total Energy: %f\n",Utot);
+		printPositions();
+
+		if(collisions(particles)) printf("Collision detected!\n");
+	}
 	return 0;
 }
 
 void printPositions(void){
-	FILE *posFile = fopen("positions.dat","w");
+	FILE *posFile = fopen(fn,"w");
 	int i=0;
+	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tT = %f\n",N,N1,N2,U0,M1,M2,height,width,T);
 	fprintf(posFile,"#x\tz\tangle\tspecies (3patch: %d)\n",THREEPATCH);
 	for(i=0;i<N;i++){
 		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
