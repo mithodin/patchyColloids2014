@@ -10,3 +10,4 @@ extern double width;
 extern double T;
 extern const double delta;
 extern const double sigma;
+extern int steps;

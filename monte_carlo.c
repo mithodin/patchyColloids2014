@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include "colloid.h"
 #include "monte_carlo.h"
 #include "parameters.h"
@@ -7,8 +8,9 @@
 #include "mt19937ar.h"
 
 const double paccept = 0.6;
-double dmax = 2; //completely random numbers
-double amax = 2.0/3.0*M_PI;
+double dmax = 0.01; //completely random numbers
+double amax = 0.01*2.0/3.0*M_PI;
+double simRate = 0; //mc steps per second.
 
 double extPotential(Colloid *c){
 	return 0;
@@ -46,7 +48,10 @@ double pairPotential(Colloid *particle, int *collision){
 }
 
 void initDmax(Colloid *carray){
-	double pnow = monteCarloSteps(carray,1000);
+	printf("Initial test run...");
+	fflush(stdout);
+	double pnow = monteCarloSteps(carray,5000);
+	printf(" done\n");
 	/*
 	do{
 		dmax = pnow/paccept*dmax;
@@ -115,24 +120,45 @@ double monteCarloStep(Colloid *carray){ //returns acceptance rate
 
 double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	FILE *output = fopen("/dev/null","w");
-	if(howmany > 1000){
+	if(howmany > 5000){
 		output = stdout;
 	}
-	fprintf(output,"Running %d steps: [",howmany);
 	double p=0;
 	int i = 0;
-	for(i = 0; i < howmany; ++i){
-		p+=monteCarloStep(carray);
-		if(fmod((100.0*i)/howmany,1) == 0){
-			if(fmod((100.0*i)/howmany,10) == 0){
-				fprintf(output,"%d%%",(int)((100.0*i)/howmany));
-			}else{
-				fprintf(output,".");
-			}
-			fflush(output);
-		}
+	if(simRate != 0){
+		double sETA = ((double)howmany)/simRate;
+		int hours = (int)floor(sETA/60.0/60.0);
+		sETA -= hours*60*60;
+		int minutes = (int)floor(sETA/60.0);
+		sETA -= minutes*60;
+		fprintf(output, "Running %d steps (eta: %dh %dmin %ds)\n [",howmany,hours,minutes,(int)ceil(sETA));
+	}else{
+		fprintf(output,"Running %d steps\n[",howmany);
 	}
+	struct timeval start,stop;
+	gettimeofday(&start,NULL);
+	int onePerc = howmany/100;
+	int k = 0;
+	for(i = 0; i < 100; ++i){
+		for(k = 0; k < onePerc; ++k){
+			p+=monteCarloStep(carray);
+		}
+		if(i%10 == 0){
+			fprintf(output,"%d%%",i);
+		}else{
+			fprintf(output,".");
+		}
+		fflush(output);
+	}
+	gettimeofday(&stop,NULL);
 	fprintf(output,"100%%]\n");
+	double secs = (stop.tv_sec - start.tv_sec) + (double)(stop.tv_usec - start.tv_usec)/10e6;
+	simRate=((double)howmany)/secs;
+	int hours = (int)floor(secs/60.0/60.0);
+	secs -= hours*60*60;
+	int minutes = (int)floor(secs/60.0);
+	secs -= minutes*60;
+	fprintf(output,"Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
 	return p/howmany;
 }
 

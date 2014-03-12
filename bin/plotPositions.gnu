@@ -1,10 +1,10 @@
 height = 50
 width = 40
 coldiameter = 1.0
-patchdiameter = 0.119
-datafile = "positions-T10.dat"
+patchdiameter = 0.11965683746373795115
+datafile = "positions-T0.dat"
 params = system("head -n 1 ".datafile." | cut -d '#' -f 2 | tr '\t' '\n'");
-prefix = "T10"
+prefix = ""
 
 set samples 5000
 set xrange [-1:1+width]

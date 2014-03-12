@@ -71,6 +71,7 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 			printf("No valid value found for width. Aborting.\n");
 			return 0;
 		}
+		if(config_lookup_int(parameters,"steps",&steps) == CONFIG_FALSE) steps = 1000;
 		if(config_lookup_float(parameters,"T",&T) == CONFIG_FALSE){
 			temperature = config_lookup(parameters,"T");
 			if(temperature == NULL){

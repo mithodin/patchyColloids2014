@@ -28,11 +28,11 @@ double height;
 double width;
 double T;
 const double U0 = 1;
-const double delta = 0.119; //Patch diameter
+const double delta = 0.11965683746373795115; //Patch diameter
 const double sigma = 1.0; //Colloid diameter
 
 double Utot = 0; //Total Energy
-const int steps = 100000;
+int steps;
 
 char fn[40];
 
@@ -43,7 +43,7 @@ int main(void){ 	//This is only for testing so far.
 	if(parameters==NULL) return 1;
 	
 	while(loadParams()){;
-		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\n",N,N1,N2,U0,M1,M2,height,width,T);
+		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,T,steps);
 
 		long int seed=random_seed();
 		init_genrand((unsigned long)seed);
