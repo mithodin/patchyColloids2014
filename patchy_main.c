@@ -32,10 +32,11 @@ const double delta = 0.119; //Patch diameter
 const double sigma = 1.0; //Colloid diameter
 
 double Utot = 0; //Total Energy
+const int steps = 100000;
 
 char fn[40];
 
-void printPositions(void);
+void printPositions(double);
 
 int main(void){ 	//This is only for testing so far.
 	parameters=getParams();
@@ -57,22 +58,22 @@ int main(void){ 	//This is only for testing so far.
 
 		initDmax(particles);
 
-		double pacc=monteCarloSteps(particles,100000);
+		double pacc=monteCarloSteps(particles,steps);
 		printf("Overall acceptance rate: %f\n",pacc);
 
 		Utot = totalEnergy(particles);
 		printf("Total Energy: %f\n",Utot);
-		printPositions();
+		printPositions(pacc);
 
 		if(collisions(particles)) printf("Collision detected!\n");
 	}
 	return 0;
 }
 
-void printPositions(void){
+void printPositions(double paccept){
 	FILE *posFile = fopen(fn,"w");
 	int i=0;
-	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tT = %f\n",N,N1,N2,U0,M1,M2,height,width,T);
+	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tT = %f\tSteps = %d\tAcceptance Rate = %f\n",N,N1,N2,U0,M1,M2,height,width,T,steps,paccept);
 	fprintf(posFile,"#x\tz\tangle\tspecies (3patch: %d)\n",THREEPATCH);
 	for(i=0;i<N;i++){
 		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
