@@ -7,10 +7,14 @@
 #include "distance.h"
 #include "mt19937ar.h"
 
-const double paccept = 0.6;
-double dmax = 0.01; //completely random numbers
-double amax = 0.01*2.0/3.0*M_PI;
+const double paccept = 0.2;
+const double maxEnergyDeviation = 5e-3;
+const double maxAccDeviation = 1e-2;
+double dmax = 1.0; //completely random numbers
+double amax = 2.0/3.0*M_PI;
 double simRate = 0; //mc steps per second.
+
+double avg(double *, int);
 
 double extPotential(Colloid *c){
 	return 0;
@@ -48,35 +52,51 @@ double pairPotential(Colloid *particle, int *collision){
 }
 
 void initDmax(Colloid *carray){
-	printf("Initial test run...");
-	fflush(stdout);
-	double pnow = monteCarloSteps(carray,5000);
-	printf(" done\n");
-	/*
+	double d = dmax; //just storing this for later reference
+	double u[300] = {0}; //I assume this will be enough
+	double pnow = paccept;
+	int i=-1;
 	do{
-		dmax = pnow/paccept*dmax;
-		printf("trying dmax = %f...",dmax);
-		fflush(stdout);
-		pnow = monteCarloSteps(carray,1000);
-		printf("paccept: %f\n",pnow);
-	}while(fabs(pnow/paccept - 1.0) > 10e-2); 
-*/
-	printf("Using dmax = %f, amax = %f PI at paccept = %f\n",dmax,amax/M_PI,pnow);
+		++i;
+		d = dmax;
+		dmax = 0;
+		pnow = monteCarloSteps(carray,4000);
+		amax *= pnow/sqrt(paccept);
+		dmax = d;
+		pnow = monteCarloSteps(carray,4000);
+		dmax *= pnow/paccept;
+		Utot = totalEnergy(carray,&Uext,&Uint);
+		u[i] = Uint;
+		printf("Uint: %f Avg: %f paccept: %f\n",Uint,avg(u,i),pnow);
+	}while(i < 5 || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation);
+	printf("Equilibrium reached\n");
+	while(fabs(pnow/paccept - 1.0) > maxAccDeviation){
+		d = dmax;
+		dmax = 0;
+		pnow = monteCarloSteps(carray,4000);
+		amax *= pnow/paccept;
+		dmax = d;
+		pnow = monteCarloSteps(carray,4000);
+		dmax *= pnow/paccept;
+		printf("paccept: %f, dmax = %e, amax = %e\n",pnow,dmax,amax);
+	}
+	printf("Using dmax = %e, amax = %e PI at paccept = %f\n",dmax,amax/M_PI,pnow);
 }
 
-double totalEnergy(Colloid *carray){ //Give an Array here!
+double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array here!
 	double utot = 0;
-	double uext = 0;
-	double uint = 0;
+	*uext = 0;
+	*uint = 0;
 	int collision = 0;
 	int i = 0;
 	for(i = 0;i < N; ++i){
 		carray[i].vext = extPotential(&carray[i]);
 		carray[i].vint = pairPotential(&carray[i],&collision);
-		uext += carray[i].vext;
-		uint += carray[i].vint;
+		*uext += carray[i].vext;
+		*uint += carray[i].vint;
 	}
-	utot = uext + uint/2.0;
+	*uint /= 2.0;
+	utot = *uext + *uint;
 	return utot;
 }
 
@@ -176,4 +196,14 @@ double deltaU(Colloid *c, int *collision){
 	du += pairPotential(c, collision) - (*c).vint;
 
 	return du;
+}
+
+double avg(double *array, int index){
+	int span = (index+1)>5?5:(index+1);
+	int i = index - span +1;
+	double avg = 0;
+	for(;i <= index; ++i){
+		avg += array[i];
+	}
+	return avg/span;
 }

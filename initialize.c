@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "mt19937ar.h"
@@ -5,10 +6,23 @@
 #include "colloid.h"
 #include "distance.h"
 #include "initialize.h"
+#include "monte_carlo.h"
+
+extern FILE *initFile;
 
 void initParticles(Colloid *particles){
+	if(initFile){
+		initFromFile(particles);
+	}else{
+		initRandomly(particles);
+	}
+	makePeriodicX(particles);
+	makePeriodicZ(particles);
+	Utot = totalEnergy(particles, &Uext, &Uint);
+}
+
+void initRandomly(Colloid *particles){
 	int i=0;
-	Colloid *tmp = NULL;
 	Colloid *this = NULL;
 	while(i<N){
 		particles[i].x = genrand_real2()*width;
@@ -28,8 +42,10 @@ void initParticles(Colloid *particles){
 			i+=1;
 		}
 	}
-	makePeriodicX(particles);
-	makePeriodicZ(particles);
+}
+
+void initFromFile(Colloid *particles){
+	//not doing this!
 }
 
 int noCollision(int i, Colloid *particles){

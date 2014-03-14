@@ -29,10 +29,14 @@ double width;
 double T;
 const double U0 = 1;
 //const double delta = 0.11965683746373795115; //Patch diameter
-const double delta = 0.4;
+const double delta = 0.2;
 const double sigma = 1.0; //Colloid diameter
+FILE *initFile = NULL;
 
 double Utot = 0; //Total Energy
+double Uint = 0;
+double Uext = 0;
+
 int steps;
 
 char fn[40];
@@ -52,9 +56,6 @@ int main(void){ 	//This is only for testing so far.
 		particles=(Colloid *)malloc(sizeof(Colloid)*N);
 		initParticles(particles);
 		printf("Particles initialized\n");
-		//printColloidsSortedX(particles);
-		//printColloidsSortedZ(particles);
-		Utot = totalEnergy(particles);
 		printf("Total Energy: %f\n",Utot);
 
 		initDmax(particles);
@@ -62,7 +63,7 @@ int main(void){ 	//This is only for testing so far.
 		double pacc=monteCarloSteps(particles,steps);
 		printf("Overall acceptance rate: %f\n",pacc);
 
-		Utot = totalEnergy(particles);
+		Utot = totalEnergy(particles, &Uext, &Uint);
 		printf("Total Energy: %f\n",Utot);
 		printPositions(pacc);
 

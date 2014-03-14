@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <libconfig.h>
+#include <string.h>
 #include "load_config.h"
 #include "parameters.h"
 
@@ -9,6 +10,7 @@ config_setting_t *temperature;
 int t_length = 0;
 
 extern char fn[40];
+extern FILE *initFile;
 
 config_t *getParams(void){ //loads the params from a file
 	parameters=(struct config_t*)malloc(sizeof(struct config_t));
@@ -30,6 +32,12 @@ config_t *getParams(void){ //loads the params from a file
 //Maybe I will extend this to handle arrays of parameters.
 int loadParams(){ //We are relying on the fact that params is a valid config_t pointer
 	if(!loaded){
+		const char *infile;
+		if(config_lookup_string(parameters,"init",&infile) == CONFIG_TRUE){
+			if(strcmp(infile,"random") != 0){
+				initFile = fopen(infile, "r");
+			}
+		}
 		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE) N = -1;
 		if(config_lookup_int(parameters,"N1",&N1) == CONFIG_FALSE) N1 = -1;
 		if(config_lookup_int(parameters,"N2",&N2) == CONFIG_FALSE) N2 = -1;
