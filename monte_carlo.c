@@ -8,11 +8,13 @@
 #include "mt19937ar.h"
 
 const double paccept = 0.2;
+const double angularPaccept = 0.3;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
 double dmax = 1.0; //completely random numbers
-double amax = 2.0/3.0*M_PI;
+double amax = 0.1*2.0/3.0*M_PI;
 double simRate = 0; //mc steps per second.
+const int maxspan = 10;
 
 double avg(double *, int);
 
@@ -61,24 +63,24 @@ void initDmax(Colloid *carray){
 		d = dmax;
 		dmax = 0;
 		pnow = monteCarloSteps(carray,4000);
-		amax *= pnow/sqrt(paccept);
+		amax *= pnow/paccept;
 		dmax = d;
 		pnow = monteCarloSteps(carray,4000);
 		dmax *= pnow/paccept;
 		Utot = totalEnergy(carray,&Uext,&Uint);
 		u[i] = Uint;
 		printf("Uint: %f Avg: %f paccept: %f\n",Uint,avg(u,i),pnow);
-	}while(i < 5 || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation);
+	}while(i < maxspan || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation);
 	printf("Equilibrium reached\n");
 
 	d = dmax;
 	dmax = 0.0;
 	do{
 		pnow = monteCarloSteps(carray,4000);
-		amax *= pnow/sqrt(paccept);
+		amax *= pnow/angularPaccept;
 		printf("paccept: %f, amax = %e\n",pnow,amax);
-	}while(fabs(pnow/sqrt(paccept) - 1.0) > maxAccDeviation);
-	printf("Found amax = %f\n",amax);
+	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation);
+	printf("Found amax = %e\n",amax);
 
 	dmax = d;
 	do{
@@ -157,9 +159,9 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		fprintf(output, "Running %d steps (eta: %dh %dmin %ds)\n [",howmany,hours,minutes,(int)ceil(sETA));
+		fprintf(output, "Running %e steps (eta: %dh %dmin %ds)\n [",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
-		fprintf(output,"Running %d steps\n[",howmany);
+		fprintf(output,"Running %e steps\n[",(double)howmany);
 	}
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);
@@ -205,7 +207,7 @@ double deltaU(Colloid *c, int *collision){
 }
 
 double avg(double *array, int index){
-	int span = (index+1)>5?5:(index+1);
+	int span = (index+1)>maxspan?maxspan:(index+1);
 	int i = index - span +1;
 	double avg = 0;
 	for(;i <= index; ++i){
