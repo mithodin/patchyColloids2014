@@ -70,16 +70,22 @@ void initDmax(Colloid *carray){
 		printf("Uint: %f Avg: %f paccept: %f\n",Uint,avg(u,i),pnow);
 	}while(i < 5 || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation);
 	printf("Equilibrium reached\n");
-	while(fabs(pnow/paccept - 1.0) > maxAccDeviation){
-		d = dmax;
-		dmax = 0;
+
+	d = dmax;
+	dmax = 0.0;
+	do{
 		pnow = monteCarloSteps(carray,4000);
-		amax *= pnow/paccept;
-		dmax = d;
+		amax *= pnow/sqrt(paccept);
+		printf("paccept: %f, amax = %e\n",pnow,amax);
+	}while(fabs(pnow/sqrt(paccept) - 1.0) > maxAccDeviation);
+	printf("Found amax = %f\n",amax);
+
+	dmax = d;
+	do{
 		pnow = monteCarloSteps(carray,4000);
 		dmax *= pnow/paccept;
-		printf("paccept: %f, dmax = %e, amax = %e\n",pnow,dmax,amax);
-	}
+		printf("paccept: %f, dmax = %e\n",pnow,dmax);
+	}while(fabs(pnow/paccept - 1.0) > maxAccDeviation);
 	printf("Using dmax = %e, amax = %e PI at paccept = %f\n",dmax,amax/M_PI,pnow);
 }
 
