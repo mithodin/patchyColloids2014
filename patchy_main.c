@@ -28,7 +28,8 @@ double height;
 double width;
 double T;
 const double U0 = 1;
-const double delta = 0.11965683746373795115; //Patch diameter
+//const double delta = 0.11965683746373795115; //Patch diameter
+const double delta = 0.4;
 const double sigma = 1.0; //Colloid diameter
 
 double Utot = 0; //Total Energy

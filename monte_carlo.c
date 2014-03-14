@@ -140,15 +140,15 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	int onePerc = howmany/100;
 	int k = 0;
 	for(i = 0; i < 100; ++i){
-		for(k = 0; k < onePerc; ++k){
-			p+=monteCarloStep(carray);
-		}
 		if(i%10 == 0){
 			fprintf(output,"%d%%",i);
 		}else{
 			fprintf(output,".");
 		}
 		fflush(output);
+		for(k = 0; k < onePerc; ++k){
+			p+=monteCarloStep(carray);
+		}
 	}
 	gettimeofday(&stop,NULL);
 	fprintf(output,"100%%]\n");
