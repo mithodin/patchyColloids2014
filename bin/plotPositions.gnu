@@ -1,5 +1,5 @@
-height = 50
-width = 40
+height = 65
+width = 65
 coldiameter = 1.0
 patchdiameter = 0.11965683746373795115
 #patchdiameter = 0.2
@@ -8,8 +8,8 @@ params = system("head -n 1 ".datafile." | cut -d '#' -f 2 | tr '\t' '\n'");
 prefix = ""
 
 set samples 5000
-set xrange [-1:1+width]
-set yrange [-1:1+height]
+set xrange [-5:5+width]
+set yrange [-5:5+height]
 set size ratio 1
 
 set key outside vertical top left reverse

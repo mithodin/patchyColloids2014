@@ -1,4 +1,4 @@
-double extPotential(Colloid *);
+double extPotential(Colloid *, int*);
 double pairPotential(Colloid *, int*);
 double totalEnergy(Colloid *, double *, double *);
 double monteCarloStep(Colloid *);

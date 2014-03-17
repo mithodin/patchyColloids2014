@@ -8,7 +8,7 @@
 #include "mt19937ar.h"
 
 const double paccept = 0.2;
-const double angularPaccept = 0.3;
+const double angularPaccept = 0.4;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
 double dmax = 1.0; //completely random numbers
@@ -18,7 +18,8 @@ const int maxspan = 10;
 
 double avg(double *, int);
 
-double extPotential(Colloid *c){
+double extPotential(Colloid *c, int *collision){
+	*collision = 0;
 	return 0;
 }
 
@@ -98,7 +99,7 @@ double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array
 	int collision = 0;
 	int i = 0;
 	for(i = 0;i < N; ++i){
-		carray[i].vext = extPotential(&carray[i]);
+		carray[i].vext = extPotential(&carray[i],&collision);
 		carray[i].vint = pairPotential(&carray[i],&collision);
 		*uext += carray[i].vext;
 		*uint += carray[i].vint;
@@ -119,12 +120,9 @@ double monteCarloStep(Colloid *carray){ //returns acceptance rate
 		oldz = carray[i].z;
 		olda = carray[i].a;
 
-		a = genrand_real2()*2.0*M_PI; //do it this way to get evenly distributed lengths
-		r = genrand_real1()*dmax;
-
-		carray[i].z = realZ(carray[i].z+r*cos(a));
-		carray[i].x = realX(carray[i].x+r*sin(a));
-		carray[i].a = carray[i].a + genrand_real2()*amax;
+		carray[i].z = realZ(carray[i].z+dmax*(genrand_real1()*2.0-1.0));
+		carray[i].x = realZ(carray[i].x+dmax*(genrand_real1()*2.0-1.0));
+		carray[i].a = carray[i].a + (2.0*genrand_real2()-1.0)*amax;
 
 		reSortX(&carray[i]);
 		reSortZ(&carray[i]);
@@ -138,7 +136,7 @@ double monteCarloStep(Colloid *carray){ //returns acceptance rate
 			reSortX(&carray[i]);
 			reSortZ(&carray[i]);
 		}else{
-			carray[i].vext = extPotential(&carray[i]);
+			carray[i].vext = extPotential(&carray[i],&collision);
 			carray[i].vint = pairPotential(&carray[i],&collision);
 			p += 1.0;
 		}
@@ -148,19 +146,18 @@ double monteCarloStep(Colloid *carray){ //returns acceptance rate
 
 double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	FILE *output = fopen("/dev/null","w");
-	if(howmany > 5000){
-		output = stdout;
-	}
 	double p=0;
 	int i = 0;
 	if(simRate != 0){
 		double sETA = ((double)howmany)/simRate;
+		if(sETA > 5){ output = stdout; }
 		int hours = (int)floor(sETA/60.0/60.0);
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
 		fprintf(output, "Running %e steps (eta: %dh %dmin %ds)\n [",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
+		output = stdout;
 		fprintf(output,"Running %e steps\n[",(double)howmany);
 	}
 	struct timeval start,stop;
@@ -200,9 +197,12 @@ int accept(double du){
 
 double deltaU(Colloid *c, int *collision){
 	double du = 0;
-	du = extPotential(c) - (*c).vext;
-	du += pairPotential(c, collision) - (*c).vint;
-
+	int col = 0;
+	*collision = 0;
+	du = extPotential(c,&col) - (*c).vext;
+	*collision += col;
+	du += pairPotential(c, &col) - (*c).vint;
+	*collision += col;
 	return du;
 }
 

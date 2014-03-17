@@ -53,6 +53,8 @@ int noCollision(int i, Colloid *particles){
 	double z = particles[i].z;
 	double xj = 0, zj = 0;
 	int j=0;
+	extPotential(&particles[i],&j);
+	if( j ) return 0;
 	for(j=0;j<i;j++){
 		xj = particles[j].x;
 		zj = particles[j].z;
