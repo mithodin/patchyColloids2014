@@ -1,5 +1,5 @@
-height = 65
-width = 65
+height = 60
+width = 60
 coldiameter = 1.0
 patchdiameter = 0.11965683746373795115
 #patchdiameter = 0.2
