@@ -17,7 +17,6 @@ void initParticles(Colloid *particles){
 		initRandomly(particles);
 	}
 	makePeriodicX(particles);
-	makePeriodicZ(particles);
 	Utot = totalEnergy(particles, &Uext, &Uint);
 }
 
@@ -26,7 +25,7 @@ void initRandomly(Colloid *particles){
 	Colloid *this = NULL;
 	while(i<N){
 		particles[i].x = genrand_real2()*width;
-		particles[i].z = genrand_real2()*height;
+		particles[i].z = genrand_real2()*(height-1)+0.5; //For not bumping into walls
 		particles[i].a = genrand_real2()*2*M_PI;
 		if(noCollision(i,particles)){
 			this = &particles[i];

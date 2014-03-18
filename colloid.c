@@ -147,7 +147,7 @@ void insertBelow(Colloid *list, Colloid *newitem){
 
 void printColloidsSortedZ(Colloid *list){
 	printf("Colloids sorted by z coordinate:\n");
-	while( (*list).below && (*(*list).below).z < (*list).z ){
+	while( (*list).below ){
 		list = (*list).below;
 	}
 	do {
@@ -157,28 +157,15 @@ void printColloidsSortedZ(Colloid *list){
 			printf("[%f] ",(*list).z);
 		}
 		list = (*list).above;
-	}while( list && (*(*list).below).z < (*list).z );
+	}while( list );
 	printf("\n");
 }
 
-void makePeriodicZ(Colloid *list){
-	Colloid *first=list;
-	Colloid *last=list;
-	while( (*first).below ){
-		first = (*first).below;
-	}
-	while( (*last).above ){
-		last = (*last).above;
-	}
-	(*first).below = last;
-	(*last).above = first;
-}
-
 void reSortZ(Colloid *list){ //Point to the changed element!
-	while( (*list).z > (*(*list).above).z && (*(*list).above).z > (*(*list).below).z ){
+	while( list->above && list->z > list->above->z ){
 		swapUp(list);
 	}
-	while( (*list).z < (*(*list).below).z && (*(*list).above).z > (*(*list).below).z ){
+	while( list->below && list->z < list->below->z ){
 		swapDown(list);
 	}
 }
@@ -188,8 +175,8 @@ void swapUp(Colloid *list){
 	Colloid *curBelow = (*list).below;
 	(*list).above = (*curAbove).above;
 	(*list).below = curAbove;
-	(*curBelow).above = curAbove;
-	(*(*curAbove).above).below = list;
+	if( curBelow ) (*curBelow).above = curAbove;
+	if( curAbove->above ) (*(*curAbove).above).below = list;
 	(*curAbove).below = curBelow;
 	(*curAbove).above = list;
 }
@@ -199,8 +186,8 @@ void swapDown(Colloid *list){
 	Colloid *curBelow = (*list).below;
 	(*list).below = (*curBelow).below;
 	(*list).above = curBelow;
-	(*(*curBelow).below).above = list;
-	(*curAbove).below = curBelow;
+	if( curBelow->below ) (*(*curBelow).below).above = list;
+	if( curAbove ) (*curAbove).below = curBelow;
 	(*curBelow).above = curAbove;
 	(*curBelow).below = list;
 }

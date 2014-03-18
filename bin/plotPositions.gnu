@@ -36,35 +36,5 @@ plot datafile u 1:2:(coldiameter/2.0):($4*2+1) with circles lc variable fs solid
      datafile u ($1+width+cos($3)/2):($2+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
      datafile u ($1+width+$4*cos($3+2.0/3.0*pi)/2):($2+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
      datafile u ($1+width+$4*cos($3+4.0/3.0*pi)/2):($2+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+(1-$4)*cos($3+pi)/2):($2+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width):($2-height):(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1-width+cos($3)/2):($2-height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1-width+$4*cos($3+2.0/3.0*pi)/2):($2-height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width+$4*cos($3+4.0/3.0*pi)/2):($2-height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width+(1-$4)*cos($3+pi)/2):($2-height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width):($2-height):(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+width+cos($3)/2):($2-height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+width+$4*cos($3+2.0/3.0*pi)/2):($2-height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+$4*cos($3+4.0/3.0*pi)/2):($2-height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+(1-$4)*cos($3+pi)/2):($2-height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width):($2+height):(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1-width+cos($3)/2):($2+height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1-width+$4*cos($3+2.0/3.0*pi)/2):($2+height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width+$4*cos($3+4.0/3.0*pi)/2):($2+height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width+(1-$4)*cos($3+pi)/2):($2+height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width):($2+height):(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+width+cos($3)/2):($2+height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+width+$4*cos($3+2.0/3.0*pi)/2):($2+height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+$4*cos($3+4.0/3.0*pi)/2):($2+height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+(1-$4)*cos($3+pi)/2):($2+height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u 1:($2+height):(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+cos($3)/2):($2+height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+$4*cos($3+2.0/3.0*pi)/2):($2+height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+$4*cos($3+4.0/3.0*pi)/2):($2+height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+(1-$4)*cos($3+pi)/2):($2+height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u 1:($2-height):(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+cos($3)/2):($2-height+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+$4*cos($3+2.0/3.0*pi)/2):($2-height+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+$4*cos($3+4.0/3.0*pi)/2):($2-height+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+(1-$4)*cos($3+pi)/2):($2-height+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder\
+     datafile u ($1+width+(1-$4)*cos($3+pi)/2):($2+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder \
      	title params

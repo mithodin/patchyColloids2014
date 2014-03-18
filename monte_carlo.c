@@ -20,6 +20,10 @@ double avg(double *, int);
 
 double extPotential(Colloid *c, int *collision){
 	*collision = 0;
+	if( c->z < 0.5 || c->z > height-0.5 ){
+		*collision = 1;
+		return 0; //invalid
+	}
 	return 0;
 }
 
@@ -32,7 +36,7 @@ double pairPotential(Colloid *particle, int *collision){
 	*collision = 0;
 	while( fabs(realDx(x - (*(*partner).left).x)) <= sigma+delta ){
 		partner = (*partner).left;
-		if( fabs(realDz(z - (*partner).z)) <= sigma+delta ){
+		if( fabs(z - (*partner).z) <= sigma+delta ){
 			u += pairInteraction(particle,partner,&col);
 			if(col){
 			 	*collision = 1;
@@ -43,7 +47,7 @@ double pairPotential(Colloid *particle, int *collision){
 	partner = particle;
 	while( fabs(realDx(x - (*(*partner).right).x)) <= sigma+delta ){
 		partner = (*partner).right;
-		if( fabs(realDz(z - (*partner).z)) <= sigma+delta ){
+		if( fabs(z - (*partner).z) <= sigma+delta ){
 			u += pairInteraction(particle,partner,&col);
 			if(col){
 				*collision = 1;
