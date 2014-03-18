@@ -1,10 +1,10 @@
-height = 60
-width = 60
 coldiameter = 1.0
 patchdiameter = 0.11965683746373795115
 #patchdiameter = 0.2
 datafile = "positions-T0.dat"
 params = system("head -n 1 ".datafile." | cut -d '#' -f 2 | tr '\t' '\n'");
+height = system("head -n 1 ".datafile." | cut -s -f 7 | cut -d '=' -f 2");
+width = system("head -n 1 ".datafile." | cut -s -f 8 | cut -d '=' -f 2");
 prefix = ""
 
 set samples 5000

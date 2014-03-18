@@ -15,6 +15,7 @@
 #include "initialize.h"	//Initialization
 #include "load_config.h" //Loading the configuration
 #include "monte_carlo.h"
+#include "statistics.h"
 
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
@@ -66,6 +67,8 @@ int main(void){ 	//This is only for testing so far.
 		Utot = totalEnergy(particles, &Uext, &Uint);
 		printf("Total Energy: %f\n",Utot);
 		printPositions(pacc);
+
+		printStats(particles);
 
 		if(collisions(particles)) printf("Collision detected!\n");
 	}

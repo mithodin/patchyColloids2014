@@ -111,7 +111,7 @@ double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array
 
 double monteCarloStep(Colloid *carray){ //returns acceptance rate
 	double p=0;
-	double r = 0, a = 0, oldx = 0, oldz = 0, olda = 0;
+	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0;	
 	int collision = 0;
 	int i=0;
@@ -155,10 +155,10 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		fprintf(output, "Running %e steps (eta: %dh %dmin %ds)\n [",(double)howmany,hours,minutes,(int)ceil(sETA));
+		fprintf(output, "Running %1.0e steps (eta: %dh %dmin %ds)\n [",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
 		output = stdout;
-		fprintf(output,"Running %e steps\n[",(double)howmany);
+		fprintf(output,"Running %1.0e steps\n[",(double)howmany);
 	}
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);

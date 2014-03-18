@@ -10,6 +10,7 @@ config_setting_t *temperature;
 int t_length = 0;
 
 extern char fn[40];
+extern char statFn[40];
 extern FILE *initFile;
 
 config_t *getParams(void){ //loads the params from a file
@@ -91,11 +92,13 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 			}
 		}
 		sprintf(fn,"positions-T%d.dat",loaded);
+		sprintf(statFn,"statistics-T%d.dat",loaded);
 		loaded = 1;
 		return 1;
 	}else if(loaded < t_length){
 		T = config_setting_get_float_elem(temperature, loaded);
 		sprintf(fn,"positions-T%d.dat",loaded);
+		sprintf(statFn,"statistics-T%d.dat",loaded);
 		++loaded;
 		return 1;
 	}
