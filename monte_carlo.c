@@ -150,7 +150,7 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	int i = 0;
 	if(simRate != 0){
 		double sETA = ((double)howmany)/simRate;
-		if(sETA > 5){ output = stdout; }
+		if(sETA > 10){ output = stdout; }
 		int hours = (int)floor(sETA/60.0/60.0);
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
