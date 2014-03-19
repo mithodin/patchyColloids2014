@@ -16,6 +16,8 @@ double amax = 0.1*2.0/3.0*M_PI;
 double simRate = 0; //mc steps per second.
 const int maxspan = 10;
 
+const double g = 0.03;
+
 double avg(double *, int);
 
 double extPotential(Colloid *c, int *collision){
@@ -24,7 +26,7 @@ double extPotential(Colloid *c, int *collision){
 		*collision = 1;
 		return 0; //invalid
 	}
-	return 0;
+	return c->z*(c->sp == THREEPATCH ? M1 : M2)*g;
 }
 
 double pairPotential(Colloid *particle, int *collision){
