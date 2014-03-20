@@ -120,7 +120,6 @@ double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array
 }
 
 double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance rate
-	fflush(stdout);
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0;	
@@ -160,8 +159,6 @@ double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance ra
 }
 
 double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
-	printf("(");
-	fflush(stdout);
 	bool verbose = false;
 	double p=0;
 	int i = 0;
@@ -181,7 +178,6 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	gettimeofday(&start,NULL);
 	int onePerc = howmany/100;
 	int k = 0, j = 0;
-	printf(")\n");
 	for(i = 0; i < 100; ++i){
 		if( verbose ){
 			if( i%10 == 0){
