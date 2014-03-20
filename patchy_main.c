@@ -49,16 +49,18 @@ int main(void){ 	//This is only for testing so far.
 	parameters=getParams();
 	if(parameters==NULL) return 1;
 	
+	long int seed=random_seed();
+	init_genrand((unsigned long)seed);
+
 	while(loadParams()){;
 		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,T,steps);
-
-		long int seed=random_seed();
-		init_genrand((unsigned long)seed);
 
 		particles=(Colloid *)malloc(sizeof(Colloid)*N);
 		initParticles(particles);
 		printf("Particles initialized\n");
 		printf("Total Energy: %f\n",Utot);
+
+		initStats(height);
 
 		initDmax(particles);
 

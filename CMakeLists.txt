@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(patchy)
 
+#set(CMAKE_BUILD_TYPE Debug)
+
 include_directories("/Users/ltref/Documents/bachelor_project/libraries/include")
 link_directories("/Users/ltref/Documents/bachelor_project/libraries/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin/")

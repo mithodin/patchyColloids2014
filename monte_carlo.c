@@ -6,6 +6,7 @@
 #include "parameters.h"
 #include "distance.h"
 #include "mt19937ar.h"
+#include "statistics.h"
 
 const double paccept = 0.2;
 const double angularPaccept = 0.4;
@@ -15,6 +16,7 @@ double dmax = 1.0; //completely random numbers
 double amax = 0.1*2.0/3.0*M_PI;
 double simRate = 0; //mc steps per second.
 const int maxspan = 10;
+bool ineq = false;
 
 const double g = 0.03;
 
@@ -79,6 +81,7 @@ void initDmax(Colloid *carray){
 		printf("Uint: %f Avg: %f paccept: %f\n",Uint,avg(u,i),pnow);
 	}while(i < maxspan || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation);
 	printf("Equilibrium reached\n");
+	ineq = true;
 
 	d = dmax;
 	dmax = 0.0;
@@ -115,7 +118,7 @@ double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array
 	return utot;
 }
 
-double monteCarloStep(Colloid *carray){ //returns acceptance rate
+double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance rate
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0;	
@@ -146,6 +149,10 @@ double monteCarloStep(Colloid *carray){ //returns acceptance rate
 			carray[i].vint = pairPotential(&carray[i],&collision);
 			p += 1.0;
 		}
+		if ( statUpdate ){
+			updateDensity(carray[i].z,carray[i].sp);
+			updateF(carray[i].z,carray[i].vint/(-U0),carray[i].sp);
+		}
 	}
 	return p/N;
 }
@@ -169,7 +176,7 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);
 	int onePerc = howmany/100;
-	int k = 0;
+	int k = 0, j = 0;
 	for(i = 0; i < 100; ++i){
 		if(i%10 == 0){
 			fprintf(output,"%d%%",i);
@@ -178,7 +185,12 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 		}
 		fflush(output);
 		for(k = 0; k < onePerc; ++k){
-			p+=monteCarloStep(carray);
+			if ( ineq && j%100 == 0 ){
+				p+=monteCarloStep(carray,true);
+			}else{
+				p+=monteCarloStep(carray,false);
+			}
+			++j;
 		}
 	}
 	gettimeofday(&stop,NULL);

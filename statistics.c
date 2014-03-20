@@ -12,20 +12,21 @@ double *f1;
 double *f2;
 int bins;
 
-double **rho(Colloid*);
-double **f(Colloid*);
+int M1dens = 0, M2dens = 0, M1f = 0, M2f = 0;
+
 int binIndex(double);
+void norm(void);
+
+void initStats(int bin){
+	bins = bin;
+	rho1 = (double *)calloc(bins,sizeof(double));
+	rho2 = (double *)calloc(bins,sizeof(double));
+	f1 = (double *)calloc(bins,sizeof(double));
+	f2 = (double *)calloc(bins,sizeof(double));
+}
 
 void printStats(Colloid *carray){
-	bins = 10;
-	double **rs = rho(carray);
-	rho1 = rs[0];
-	rho2 = rs[1];
-
-	rs = f(carray);
-	f1 = rs[0];
-	f2 = rs[1];
-
+	norm();
 	FILE *stats = fopen(statFn,"w");
 	if( stats ){
 		int i;
@@ -45,56 +46,46 @@ void printStats(Colloid *carray){
 	fclose(stats);
 }
 
-double **rho(Colloid *carray){
-	double *r1 = calloc(bins,sizeof(double));
-	double *r2 = calloc(bins,sizeof(double));
-	static double *rs[2];
-	rs[0] = r1;
-	rs[1] = r2;
-	int i = 0;
-	for(i = 0;i<N;++i){
-		switch(carray[i].sp){
-			case THREEPATCH:
-				++(r1[binIndex(carray[i].z)]);
-				break;
-			case TWOPATCH:
-				++(r2[binIndex(carray[i].z)]);
-				break;
-		}
-	}
+void norm(void){
+	int i;
 	for(i = 0;i<bins;++i){
-		r1[i] /= N1;
-		r2[i] /= N2;
+		rho1[i] /= M1dens;
+		rho2[i] /= M2dens;
+		if ( rho1[i] != 0 ) f1[i] /= 3.0*rho1[i]*M1f;
+		if ( rho2[i] != 0 ) f2[i] /= 2.0*rho2[i]*M2f;
 	}
-	return rs;
-}
-
-double **f(Colloid *carray){ //rho needs to be calculated first
-	double *f1 = calloc(bins,sizeof(double));
-	double *f2 = calloc(bins,sizeof(double));
-	static double *fs[2];
-	fs[0] = f1;
-	fs[1] = f2;
-	int i = 0;
-	for(i = 0;i<N;++i){
-		switch(carray[i].sp){
-			case THREEPATCH:
-				f1[binIndex(carray[i].z)] += carray[i].vint/(-U0);
-				break;
-			case TWOPATCH:
-				f2[binIndex(carray[i].z)] += carray[i].vint/(-U0);
-				break;
-		}
-	}
-	for(i = 0;i<bins;++i){
-		f1[i] /= N1*3.0*rho1[i];
-		f2[i] /= N2*2.0*rho2[i];
-	}
-	return fs;
 }
 
 int binIndex(double z){
 	int i = (int)(z/height*bins);
 	i = i < bins ? i : bins-1;
 	return i;
+}
+
+void updateDensity(double z, species kind){
+	int i = binIndex(z);
+	switch(kind){
+		case THREEPATCH:
+			rho1[i] += 1.0;
+			++M1dens;
+			break;
+		case TWOPATCH:
+			rho2[i] += 1.0;
+			++M2dens;
+			break;
+	}
+}
+
+void updateF(double z, double val, species kind){
+	int i = binIndex(z);
+	switch(kind){
+		case THREEPATCH:
+			f1[i] += val;
+			++M1f;
+			break;
+		case TWOPATCH:
+			f2[i] += val;
+			++M2f;
+			break;
+	}
 }
