@@ -64,7 +64,7 @@ double pairPotential(Colloid *particle, int *collision){
 
 void initDmax(Colloid *carray){
 	double d = dmax; //just storing this for later reference
-	double u[300] = {0}; //I assume this will be enough
+	double u[maxspan] = {0};
 	double pnow = paccept;
 	int i=-1;
 	do{
@@ -73,13 +73,14 @@ void initDmax(Colloid *carray){
 		dmax = 0;
 		pnow = monteCarloSteps(carray,4000);
 		amax *= pnow/paccept;
+		amax = amax > 2.0*M_PI ? 2.0*M_PI : amax; //for high temperatures, amax is practically meaningless
 		dmax = d;
 		pnow = monteCarloSteps(carray,4000);
 		dmax *= pnow/paccept;
 		Utot = totalEnergy(carray,&Uext,&Uint);
-		u[i] = Uint;
+		u[i%maxspan] = Uint;
 		printf("Uint: %f Avg: %f paccept: %f\n",Uint,avg(u,i),pnow);
-	}while(i < maxspan || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation);
+	}while( ( i < maxspan || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation ) && i < 500);
 	printf("Equilibrium reached\n");
 	ineq = true;
 
@@ -89,7 +90,7 @@ void initDmax(Colloid *carray){
 		pnow = monteCarloSteps(carray,4000);
 		amax *= pnow/angularPaccept;
 		printf("paccept: %f, amax = %e\n",pnow,amax);
-	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation);
+	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation && amax <= 2.0*M_PI);
 	printf("Found amax = %e\n",amax);
 
 	dmax = d;
@@ -119,6 +120,7 @@ double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array
 }
 
 double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance rate
+	fflush(stdout);
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0;	
@@ -158,32 +160,37 @@ double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance ra
 }
 
 double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
-	FILE *output = fopen("/dev/null","w");
+	printf("(");
+	fflush(stdout);
+	bool verbose = false;
 	double p=0;
 	int i = 0;
 	if(simRate != 0){
 		double sETA = ((double)howmany)/simRate;
-		if(sETA > 10){ output = stdout; }
+		if(sETA > 10){ verbose = true; }
 		int hours = (int)floor(sETA/60.0/60.0);
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		fprintf(output, "Running %1.0e steps (eta: %dh %dmin %ds)\n [",(double)howmany,hours,minutes,(int)ceil(sETA));
+		if ( verbose ) printf("Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
-		output = stdout;
-		fprintf(output,"Running %1.0e steps\n[",(double)howmany);
+		verbose = true;
+		printf("Running %1.0e steps\n[",(double)howmany);
 	}
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);
 	int onePerc = howmany/100;
 	int k = 0, j = 0;
+	printf(")\n");
 	for(i = 0; i < 100; ++i){
-		if(i%10 == 0){
-			fprintf(output,"%d%%",i);
-		}else{
-			fprintf(output,".");
+		if( verbose ){
+			if( i%10 == 0){
+				printf("%d%%",i);
+			}else{
+				printf(".");
+			}
+			fflush(stdout);
 		}
-		fflush(output);
 		for(k = 0; k < onePerc; ++k){
 			if ( ineq && j%100 == 0 ){
 				p+=monteCarloStep(carray,true);
@@ -194,14 +201,14 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 		}
 	}
 	gettimeofday(&stop,NULL);
-	fprintf(output,"100%%]\n");
+	if (verbose ) printf("100%%]\n");
 	double secs = (stop.tv_sec - start.tv_sec) + (double)(stop.tv_usec - start.tv_usec)/10e6;
 	simRate=((double)howmany)/secs;
 	int hours = (int)floor(secs/60.0/60.0);
 	secs -= hours*60*60;
 	int minutes = (int)floor(secs/60.0);
 	secs -= minutes*60;
-	fprintf(output,"Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
+	if (verbose ) printf("Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
 	return p/howmany;
 }
 
@@ -225,10 +232,10 @@ double deltaU(Colloid *c, int *collision){
 }
 
 double avg(double *array, int index){
-	int span = (index+1)>maxspan?maxspan:(index+1);
-	int i = index - span +1;
+	int span = (index+1)>maxspan ? maxspan : index+1;
+	int i = 0;
 	double avg = 0;
-	for(;i <= index; ++i){
+	for(;i < span; ++i){
 		avg += array[i];
 	}
 	return avg/span;

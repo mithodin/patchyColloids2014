@@ -39,20 +39,30 @@ double Utot = 0; //Total Energy
 double Uint = 0;
 double Uext = 0;
 
+extern double *rho1,*rho2,*f1,*f2;
+extern double dmax,amax,simRate;
+extern bool ineq;
+
 int steps;
 
 char fn[40];
 
 void printPositions(double);
+void reset(void);
 
 int main(void){ 	//This is only for testing so far.
 	parameters=getParams();
-	if(parameters==NULL) return 1;
+	if(parameters==NULL){
+		printf("Error loading parameters.cfg\n");
+		return 1;
+	}
 	
 	long int seed=random_seed();
 	init_genrand((unsigned long)seed);
 
-	while(loadParams()){;
+	int params = 0;
+	while( (params = loadParams()) ){;
+		printf("Round %d\n",params);
 		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,T,steps);
 
 		particles=(Colloid *)malloc(sizeof(Colloid)*N);
@@ -74,7 +84,9 @@ int main(void){ 	//This is only for testing so far.
 		printStats(particles);
 
 		if(collisions(particles)) printf("Collision detected!\n");
+		reset();
 	}
+	printf("So long and thanks for all the fish...\n");
 	return 0;
 }
 
@@ -87,4 +99,16 @@ void printPositions(double paccept){
 		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
 	}
 	fclose(posFile);
+}
+
+void reset(void){
+	free(particles);
+	free(rho1);
+	free(rho2);
+	free(f1);
+	free(f2);
+	dmax = 1.0;
+	amax = 0.1*2.0/3.0*M_PI;
+	simRate = 0;
+	ineq = false;
 }

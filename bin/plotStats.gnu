@@ -1,10 +1,10 @@
-datafile = "statistics-T0.dat"
+datafile = "statistics.dat"
 prefix = ""
 number = system("ls positions*png 2> /dev/null | wc -l | bc")
 
 set samples 5000
 
-set terminal pngcairo size 2000,2000 enhanced color font "CMU Sans Serif,28"
+set terminal pngcairo size 2000,2000 enhanced color font "CMU Sans Serif,28" lw 3
 set output prefix."density".number.".png"
 
 set xlabel "z Coordinate"

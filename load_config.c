@@ -7,7 +7,9 @@
 config_t *parameters;
 int loaded = 0;
 config_setting_t *temperature;
+config_setting_t *mass2;
 int t_length = 0;
+int m2_length = 0;
 
 extern char fn[40];
 extern char statFn[40];
@@ -69,9 +71,15 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 			return 0;
 		}
 		if(config_lookup_float(parameters,"M2",&M2) == CONFIG_FALSE){
-			printf("No valid value found for M2. Aborting.\n");
-			return 0;
-		}
+			mass2 = config_lookup(parameters,"M2");
+			if(mass2 == NULL){
+				printf("No valid value found for M2. Aborting.\n");
+				return 0;
+			}else{
+				M2 = config_setting_get_float_elem(mass2, loaded);
+				m2_length = config_setting_length(mass2);
+			}
+		}else{ m2_length = 1; }
 		if(config_lookup_float(parameters,"height",&height) == CONFIG_FALSE){
 			printf("No valid value found for height. Aborting.\n");
 			return 0;
@@ -90,17 +98,20 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 				T = config_setting_get_float_elem(temperature, loaded);
 				t_length = config_setting_length(temperature);
 			}
-		}
-		sprintf(fn,"positions-T%d.dat",loaded);
-		sprintf(statFn,"statistics-T%d.dat",loaded);
+		}else{ t_length = 1; }
+		sprintf(fn,"positions-T%d-M%d.dat",0,0);
+		sprintf(statFn,"statistics-T%d-M%d.dat",0,0);
 		loaded = 1;
-		return 1;
-	}else if(loaded < t_length){
-		T = config_setting_get_float_elem(temperature, loaded);
-		sprintf(fn,"positions-T%d.dat",loaded);
-		sprintf(statFn,"statistics-T%d.dat",loaded);
+		return loaded;
+	}else if(loaded < t_length * m2_length){
+		int iM2 = loaded%m2_length;
+		int iT = loaded/m2_length;
+		T = config_setting_get_float_elem(temperature, iT);
+		M2 = config_setting_get_float_elem(mass2, iM2);
+		sprintf(fn,"positions-T%d-M%d.dat",iT,iM2);
+		sprintf(statFn,"statistics-T%d-M%d.dat",iT,iM2);
 		++loaded;
-		return 1;
+		return loaded;
 	}
 	return 0;
 }
