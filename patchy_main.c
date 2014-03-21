@@ -66,7 +66,7 @@ int main(void){ 	//This is only for testing so far.
 	int params = 0;
 	while( (params = loadParams()) ){;
 		printf("Round %d\n",params);
-		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,T,steps);
+		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\ng = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps);
 
 		particles=(Colloid *)malloc(sizeof(Colloid)*N);
 		initParticles(particles);
@@ -96,7 +96,7 @@ int main(void){ 	//This is only for testing so far.
 void printPositions(double paccept){
 	FILE *posFile = fopen(fn,"w");
 	int i=0;
-	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tT = %f\tSteps = %d\tAcceptance Rate = %f\n",N,N1,N2,U0,M1,M2,height,width,T,steps,paccept);
+	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tg = %f\tT = %f\tSteps = %d\tAcceptance Rate = %f\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps,paccept);
 	fprintf(posFile,"#x\tz\tangle\tspecies (3patch: %d)\n",THREEPATCH);
 	for(i=0;i<N;i++){
 		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
