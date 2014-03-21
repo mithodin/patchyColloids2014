@@ -20,6 +20,7 @@
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
 
+//PARAMS
 int N;
 int N1;
 int N2;
@@ -32,6 +33,8 @@ const double U0 = 1;
 const double delta = 0.11965683746373795115; //Patch diameter
 //const double delta = 0.2;
 const double sigma = 1.0; //Colloid diameter
+double g;
+// END PARAMS
 
 FILE *initFile = NULL;
 

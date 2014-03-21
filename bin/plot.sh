@@ -3,8 +3,7 @@ num=`ls positions*png 2> /dev/null | wc -l | bc`
 
 for datei in `ls positions*dat`
 	do
-	vars=`echo $datei | cut -d '-' -f 2-3`
-	echo $vars
+	vars=`echo $datei | cut -d '-' -f 2-`
 	mv $datei positions.dat
 	mv statistics-$vars statistics.dat
 	gnuplot plotStats.gnu

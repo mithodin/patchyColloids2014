@@ -8,8 +8,10 @@ config_t *parameters;
 int loaded = 0;
 config_setting_t *temperature;
 config_setting_t *mass2;
+config_setting_t *grav;
 int t_length = 0;
 int m2_length = 0;
+int g_length = 0;
 
 extern char fn[40];
 extern char statFn[40];
@@ -80,6 +82,17 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 				m2_length = config_setting_length(mass2);
 			}
 		}else{ m2_length = 1; }
+		if(config_lookup_float(parameters,"g",&g) == CONFIG_FALSE){
+			grav = config_lookup(parameters,"g");
+			if(grav == NULL){
+				printf("No valid value found for g. Aborting.\n");
+				return 0;
+			}else{
+				g = config_setting_get_float_elem(grav, loaded);
+				g_length = config_setting_length(grav);
+			}
+		}else{ g_length = 1; }
+
 		if(config_lookup_float(parameters,"height",&height) == CONFIG_FALSE){
 			printf("No valid value found for height. Aborting.\n");
 			return 0;
@@ -99,17 +112,19 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 				t_length = config_setting_length(temperature);
 			}
 		}else{ t_length = 1; }
-		sprintf(fn,"positions-T%d-M%d.dat",0,0);
-		sprintf(statFn,"statistics-T%d-M%d.dat",0,0);
+		sprintf(fn,"positions-T%d-M%d-G%d.dat",0,0,0);
+		sprintf(statFn,"statistics-T%d-M%d-G%d.dat",0,0,0);
 		loaded = 1;
 		return loaded;
-	}else if(loaded < t_length * m2_length){
+	}else if(loaded < t_length * m2_length * g_length){
 		int iM2 = loaded%m2_length;
-		int iT = loaded/m2_length;
-		T = config_setting_get_float_elem(temperature, iT);
-		M2 = config_setting_get_float_elem(mass2, iM2);
-		sprintf(fn,"positions-T%d-M%d.dat",iT,iM2);
-		sprintf(statFn,"statistics-T%d-M%d.dat",iT,iM2);
+		int iT = (loaded/m2_length)%t_length;
+		int iG = (loaded/m2_length/t_length)%g_length;
+		T = temperature ? config_setting_get_float_elem(temperature, iT) : T;
+		M2 = mass2 ? config_setting_get_float_elem(mass2, iM2) : M2;
+		g = grav ? config_setting_get_float_elem(grav, iG) : g;
+		sprintf(fn,"positions-T%d-M%d-G%d.dat",iT,iM2,iG);
+		sprintf(statFn,"statistics-T%d-M%d-G%d.dat",iT,iM2,iG);
 		++loaded;
 		return loaded;
 	}

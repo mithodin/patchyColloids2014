@@ -18,8 +18,6 @@ double simRate = 0; //mc steps per second.
 const int maxspan = 10;
 bool ineq = false;
 
-const double g = 0.03;
-
 double avg(double *, int);
 
 double extPotential(Colloid *c, int *collision){
