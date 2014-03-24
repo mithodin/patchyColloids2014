@@ -12,7 +12,7 @@ double *f1;
 double *f2;
 int bins;
 
-int M1dens = 0, M2dens = 0, M1f = 0, M2f = 0;
+int M1dens = 0, M2dens = 0;
 
 int binIndex(double);
 void norm(void);
@@ -23,6 +23,8 @@ void initStats(int bin){
 	rho2 = (double *)calloc(bins,sizeof(double));
 	f1 = (double *)calloc(bins,sizeof(double));
 	f2 = (double *)calloc(bins,sizeof(double));
+	M1dens = 0;
+	M2dens = 0;
 }
 
 void printStats(Colloid *carray){
@@ -49,10 +51,10 @@ void printStats(Colloid *carray){
 void norm(void){
 	int i;
 	for(i = 0;i<bins;++i){
+		if ( rho1[i] != 0 ) f1[i] /= 3.0*rho1[i];
+		if ( rho2[i] != 0 ) f2[i] /= 2.0*rho2[i];
 		rho1[i] /= M1dens;
 		rho2[i] /= M2dens;
-		if ( rho1[i] != 0 ) f1[i] /= 3.0*rho1[i]*M1f;
-		if ( rho2[i] != 0 ) f2[i] /= 2.0*rho2[i]*M2f;
 	}
 }
 
@@ -81,11 +83,9 @@ void updateF(double z, double val, species kind){
 	switch(kind){
 		case THREEPATCH:
 			f1[i] += val;
-			++M1f;
 			break;
 		case TWOPATCH:
 			f2[i] += val;
-			++M2f;
 			break;
 	}
 }

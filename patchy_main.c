@@ -42,7 +42,7 @@ double Utot = 0; //Total Energy
 double Uint = 0;
 double Uext = 0;
 
-extern double *rho1,*rho2,*f1,*f2;
+extern double *rho1,*rho2,*f1,*f2,M1dens,M2dens;
 extern double dmax,amax,simRate;
 extern bool ineq;
 
@@ -113,4 +113,6 @@ void reset(void){
 	amax = 0.1*2.0/3.0*M_PI;
 	simRate = 0;
 	ineq = false;
+	M1dens = 0;
+	M2dens = 0;
 }

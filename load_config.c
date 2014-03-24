@@ -9,9 +9,11 @@ int loaded = 0;
 config_setting_t *temperature;
 config_setting_t *mass2;
 config_setting_t *grav;
+config_setting_t *comp; //Composition
 int t_length = 0;
 int m2_length = 0;
 int g_length = 0;
+int comp_length = 0;
 
 extern char fn[40];
 extern char statFn[40];
