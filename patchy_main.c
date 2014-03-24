@@ -45,7 +45,7 @@ char statFn[40];
 int main(int argc, char* argv){
 	int maxThreads = 1;
 	pthread_t *threads;
-	int *done;
+	volatile int *done;
 
 	if ( argc == 2 ){
 		maxThreads = atoi(argv[1]);
