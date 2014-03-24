@@ -14,6 +14,7 @@ int t_length = 0;
 int m2_length = 0;
 int g_length = 0;
 int comp_length = 0;
+double x;
 
 extern char fn[40];
 extern char statFn[40];
@@ -48,30 +49,64 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE) N = -1;
 		if(config_lookup_int(parameters,"N1",&N1) == CONFIG_FALSE) N1 = -1;
 		if(config_lookup_int(parameters,"N2",&N2) == CONFIG_FALSE) N2 = -1;
+		if(config_lookup_float(parameters,"x",&x) == CONFIG_FALSE){
+			comp = config_lookup(parameters,"x");
+			if(comp == NULL){
+				comp_length = 1;
+				x = -1;
+			}else{
+				x = config_setting_get_float_elem(comp, loaded);
+				comp_length = config_setting_length(comp);
+			}
+		}else{ comp_length = 1; }
 
+		if( N1+N2+N == -3 || N1+N2+x == -3 || N1+N+x == -3 || N2+N+x == -3 ){
+			printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+			return 0;
+		}
+		if(x != -1){
+			if(x < 0 || x > 1){
+				printf("1 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				return 0;
+			}
+			if(N1+N2 == -2){
+				N1 = N*x;
+				N2 = N*(1-x);
+			}else if(N+N1 == -2){
+				if(x >= 1){
+					printf("2 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+					return 0;
+				}else{
+					N1 = (1.0/(1.0-x)-1.0)*N2;
+				}
+			}else if(N+N2 == -2){
+				N2 = (1.0/x-1.0)*N1;
+			}
+		}
 		if(N == -1){
-			if(N1 == -1 || N2 == -1){
-				printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+			if(N1 < 0 || N2 < 0){
+				printf("3 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N = N1+N2;
 			}
 		}else if(N1 == -1){
-			if(N2 == -1 || N < N2){
-				printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+			if(N2 < 0 || N < N2){
+				printf("4 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N1 = N-N2;
 			}
 		}else if(N2 == -1){
 			if(N < N1){
-				printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+				printf("5 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N2 = N-N1;
 			}
 		}else if(N != N1+N2){
-			printf("Need valid values for at least two of N,N1,N2. Aborting.\n");
+			printf("x = %f, N=%d, N1=%d, N2=%d\n",x,N,N1,N2);
+			printf("6 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 			return 0;
 		}
 		if(config_lookup_float(parameters,"M2",&M2) == CONFIG_FALSE){
@@ -114,25 +149,33 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 				t_length = config_setting_length(temperature);
 			}
 		}else{ t_length = 1; }
-		sprintf(fn,"positions-T%d-M%d-G%d.dat",0,0,0);
-		sprintf(statFn,"statistics-T%d-M%d-G%d.dat",0,0,0);
+		sprintf(fn,"positions-T%d-M%d-G%d-X%d.dat",0,0,0,0);
+		sprintf(statFn,"statistics-T%d-M%d-G%d-X%d.dat",0,0,0,0);
 		loaded = 1;
-		printf("Running %d progresss\n",t_length*m2_length*g_length);
-		printf("Round %d/%d\n",loaded,t_length*m2_length*g_length);
-		sprintf(progress,"[%d/%d]",loaded,t_length*m2_length*g_length);
+		printf("Running %d progresss\n",t_length*m2_length*g_length*comp_length);
+		printf("Round %d/%d\n",loaded,t_length*m2_length*g_length*comp_length);
+		sprintf(progress,"[%d/%d]",loaded,t_length*m2_length*g_length*comp_length);
 		return loaded;
-	}else if(loaded < t_length * m2_length * g_length){
+	}else if(loaded < t_length * m2_length * g_length * comp_length){
 		int iM2 = loaded%m2_length;
 		int iT = (loaded/m2_length)%t_length;
 		int iG = (loaded/m2_length/t_length)%g_length;
+		int iX = (loaded/m2_length/t_length/g_length)%comp_length;
 		T = temperature ? config_setting_get_float_elem(temperature, iT) : T;
 		M2 = mass2 ? config_setting_get_float_elem(mass2, iM2) : M2;
 		g = grav ? config_setting_get_float_elem(grav, iG) : g;
-		sprintf(fn,"positions-T%d-M%d-G%d.dat",iT,iM2,iG);
-		sprintf(statFn,"statistics-T%d-M%d-G%d.dat",iT,iM2,iG);
+		x = comp ? config_setting_get_float_elem(comp, iX) : x;
+		if( x < 0 || x > 1 ){
+			printf("Invalid x value!\n");
+			return 0;
+		}
+		N1 = N*x;
+		N2 = N*(x-1);
+		sprintf(fn,"positions-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
+		sprintf(statFn,"statistics-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
 		++loaded;
-		printf("Round %d/%d\n",loaded,t_length*m2_length*g_length);
-		sprintf(progress,"[%d/%d]",loaded,t_length*m2_length*g_length);
+		printf("Round %d/%d\n",loaded,t_length*m2_length*g_length*comp_length);
+		sprintf(progress,"[%d/%d]",loaded,t_length*m2_length*g_length*comp_length);
 		return loaded;
 	}
 	return 0;
