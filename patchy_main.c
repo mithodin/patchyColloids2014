@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libconfig.h> 	//We are using this to load our parameters from a file.
+#include <pthreads.h>
 
 #include "mt19937ar.h" 	//Generating random numbers
 #include "colloid.h" 	//What is a colloid?
@@ -16,6 +17,7 @@
 #include "load_config.h" //Loading the configuration
 #include "monte_carlo.h"
 #include "statistics.h"
+#include "config.h"
 
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
@@ -37,24 +39,23 @@ double g;
 // END PARAMS
 
 FILE *initFile = NULL;
-
-double Utot = 0; //Total Energy
-double Uint = 0;
-double Uext = 0;
-
-extern double *rho1,*rho2,*f1,*f2,M1dens,M2dens;
-extern double dmax,amax,simRate;
-extern bool ineq;
-
-int steps;
-
 char fn[40];
-char progress[20];
+char statFn[40];
 
-void printPositions(double);
-void reset(void);
+int main(int argc, char* argv){
+	int maxThreads = 1;
+	pthread_t *threads;
+	int *done;
 
-int main(void){ 	//This is only for testing so far.
+	if ( argc == 2 ){
+		maxThreads = atoi(argv[1]);
+		if(maxThreads == 0){ ++maxThreads; }
+	}else{
+		printf("What are you trying to tell me? Running single thread.\n");
+	}
+	threads = (pthread_t *)calloc(maxThreads,sizeof(pthread_t));
+	done = (int *)calloc(maxThreads,sizeof(int));
+
 	parameters=getParams();
 	if(parameters==NULL){
 		printf("Error loading parameters.cfg\n");
@@ -64,45 +65,55 @@ int main(void){ 	//This is only for testing so far.
 	long int seed=random_seed();
 	init_genrand((unsigned long)seed);
 
-	while( loadParams() ){;
+
+	int index = 0;
+	int realindex = 0;
+	int result = 0;
+	pthread_attr_t at;
+	while( ( index = loadParams() ) ){;
 		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\ng = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps);
+		Config *c = (Config *)malloc(sizeof(Config));
+		c->N = N;
+		c->N1 = N1;
+		c->N2 = N2;
+		c->M2 = M2;
+		c->height = height;
+		c->width = width;
+		c->g = g;
+		c->steps = steps;
+		c->dmax = 0.5;
+		c->amax = 1e-1*2.0/3.0*M_PI;
+		sprintf(c->out,"%d.stdout",index);
+		
+		if(index > maxThreads){
+			realindex = -1;
+			do{
+				for(realindex = 0;realindex < maxThreads;++realindex){
+					if(done[realindex]){
+						pthread_join(threads[realindex],&result);
+						if( result ) printf("Warning: Nonzero exit of thread %d\n",realindex);
+						goto freethreadfound;
+					}
+				}
+				nanosleep(2e9); //sleep two seconds
+			}while(true);
+		}else{
+			realindex = index-1;
+		}
+		freethreadfound:
+		c->done = &done[realindex];
 
-		particles=(Colloid *)malloc(sizeof(Colloid)*N);
-		initParticles(particles);
-		printf("%s Particles initialized\n",progress);
-		printf("%s Total Energy: %f\n",progress,Utot);
-
-		initStats(height);
-
-		initDmax(particles);
-
-		double pacc=monteCarloSteps(particles,steps);
-		printf("%s Overall acceptance rate: %f\n",progress,pacc);
-
-		Utot = totalEnergy(particles, &Uext, &Uint);
-		printf("%s Total Energy: %f\n",progress,Utot);
-		printPositions(pacc);
-
-		printStats(particles);
-
-		if(collisions(particles)) printf("%s Collision detected!\n",progress);
-		reset();
+		at = pthread_attr_init();
+		pthread_attr_setdetachstate(at, PTHREAD_CREATE_JOINABLE);
+		int rc = pthread_create(&threads[realindex],at,newThread,(void *)c);
+		if( rc ) printf("Error creating thread %d\n",realindex);
 	}
+	pthread_exit(NULL);
 	printf("So long and thanks for all the fish...\n");
 	return 0;
 }
 
-void printPositions(double paccept){
-	FILE *posFile = fopen(fn,"w");
-	int i=0;
-	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tg = %f\tT = %f\tSteps = %d\tAcceptance Rate = %f\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps,paccept);
-	fprintf(posFile,"#x\tz\tangle\tspecies (3patch: %d)\n",THREEPATCH);
-	for(i=0;i<N;i++){
-		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
-	}
-	fclose(posFile);
-}
-
+/*
 void reset(void){
 	free(particles);
 	free(rho1);
@@ -116,3 +127,4 @@ void reset(void){
 	M1dens = 0;
 	M2dens = 0;
 }
+*/
