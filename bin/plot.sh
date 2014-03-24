@@ -10,7 +10,7 @@ for datei in `ls positions*dat`
 	gnuplot plotPositions.gnu
 	mv positions.dat $datei
 	mv statistics.dat statistics-$vars
-	open bonds$num.png density$num.png positions$num.png
+	eom bonds$num.png density$num.png positions$num.png
 	num=$(( $num + 1 ))
 	echo $num
 done

@@ -115,6 +115,9 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 		sprintf(fn,"positions-T%d-M%d-G%d.dat",0,0,0);
 		sprintf(statFn,"statistics-T%d-M%d-G%d.dat",0,0,0);
 		loaded = 1;
+		printf("Running %d progresss\n",t_length*m2_length*g_length);
+		printf("Round %d/%d\n",loaded,t_length*m2_length*g_length);
+		sprintf(progress,"[%d/%d]",loaded,t_length*m2_length*g_length);
 		return loaded;
 	}else if(loaded < t_length * m2_length * g_length){
 		int iM2 = loaded%m2_length;
@@ -126,6 +129,8 @@ int loadParams(){ //We are relying on the fact that params is a valid config_t p
 		sprintf(fn,"positions-T%d-M%d-G%d.dat",iT,iM2,iG);
 		sprintf(statFn,"statistics-T%d-M%d-G%d.dat",iT,iM2,iG);
 		++loaded;
+		printf("Round %d/%d\n",loaded,t_length*m2_length*g_length);
+		sprintf(progress,"[%d/%d]",loaded,t_length*m2_length*g_length);
 		return loaded;
 	}
 	return 0;

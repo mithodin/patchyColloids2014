@@ -16,3 +16,5 @@ extern double g;
 extern double Utot;
 extern double Uint;
 extern double Uext;
+
+extern char progress[20];

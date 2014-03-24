@@ -77,9 +77,9 @@ void initDmax(Colloid *carray){
 		dmax *= pnow/paccept;
 		Utot = totalEnergy(carray,&Uext,&Uint);
 		u[i%maxspan] = Uint;
-		printf("Uint: %f Avg: %f paccept: %f\n",Uint,avg(u,i),pnow);
+		printf("%s Uint: %f Avg: %f paccept: %f\n",progress,Uint,avg(u,i),pnow);
 	}while( ( i < maxspan || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation ) && i < 500);
-	printf("Equilibrium reached\n");
+	printf("%s Equilibrium reached\n",progress);
 	ineq = true;
 
 	d = dmax;
@@ -87,17 +87,17 @@ void initDmax(Colloid *carray){
 	do{
 		pnow = monteCarloSteps(carray,4000);
 		amax *= pnow/angularPaccept;
-		printf("paccept: %f, amax = %e\n",pnow,amax);
+		printf("%s paccept: %f, amax = %e\n",progress,pnow,amax);
 	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation && amax <= 2.0*M_PI);
-	printf("Found amax = %e\n",amax);
+	printf("%s Found amax = %e\n",progress,amax);
 
 	dmax = d;
 	do{
 		pnow = monteCarloSteps(carray,4000);
 		dmax *= pnow/paccept;
-		printf("paccept: %f, dmax = %e\n",pnow,dmax);
+		printf("%s paccept: %f, dmax = %e\n",progress,pnow,dmax);
 	}while(fabs(pnow/paccept - 1.0) > maxAccDeviation);
-	printf("Using dmax = %e, amax = %e PI at paccept = %f\n",dmax,amax/M_PI,pnow);
+	printf("%s Using dmax = %e, amax = %e PI at paccept = %f\n",progress,dmax,amax/M_PI,pnow);
 }
 
 double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array here!
@@ -167,10 +167,10 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		if ( verbose ) printf("Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
+		if ( verbose ) printf("%s Running %1.0e steps (eta: %dh %dmin %ds)\n[",progress,(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
 		verbose = true;
-		printf("Running %1.0e steps\n[",(double)howmany);
+		printf("%s Running %1.0e steps\n[",progress,(double)howmany);
 	}
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);
@@ -202,7 +202,7 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	secs -= hours*60*60;
 	int minutes = (int)floor(secs/60.0);
 	secs -= minutes*60;
-	if (verbose ) printf("Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
+	if (verbose ) printf("%s Time elapsed: %dh %dmin %fs\n",progress,hours,minutes,secs);
 	return p/howmany;
 }
 

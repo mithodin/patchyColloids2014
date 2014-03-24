@@ -49,6 +49,7 @@ extern bool ineq;
 int steps;
 
 char fn[40];
+char progress[20];
 
 void printPositions(double);
 void reset(void);
@@ -63,30 +64,28 @@ int main(void){ 	//This is only for testing so far.
 	long int seed=random_seed();
 	init_genrand((unsigned long)seed);
 
-	int params = 0;
-	while( (params = loadParams()) ){;
-		printf("Round %d\n",params);
+	while( loadParams() ){;
 		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\ng = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps);
 
 		particles=(Colloid *)malloc(sizeof(Colloid)*N);
 		initParticles(particles);
-		printf("Particles initialized\n");
-		printf("Total Energy: %f\n",Utot);
+		printf("%s Particles initialized\n",progress);
+		printf("%s Total Energy: %f\n",progress,Utot);
 
 		initStats(height);
 
 		initDmax(particles);
 
 		double pacc=monteCarloSteps(particles,steps);
-		printf("Overall acceptance rate: %f\n",pacc);
+		printf("%s Overall acceptance rate: %f\n",progress,pacc);
 
 		Utot = totalEnergy(particles, &Uext, &Uint);
-		printf("Total Energy: %f\n",Utot);
+		printf("%s Total Energy: %f\n",progress,Utot);
 		printPositions(pacc);
 
 		printStats(particles);
 
-		if(collisions(particles)) printf("Collision detected!\n");
+		if(collisions(particles)) printf("%s Collision detected!\n",progress);
 		reset();
 	}
 	printf("So long and thanks for all the fish...\n");
