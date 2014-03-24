@@ -11,6 +11,10 @@ struct conf{
 	double g;
 	double dmax;
 	double amax;
+	
+	double Utot;
+	double Uint;
+	double Uext;
 
 	char out[40];
 	char statOut[40];

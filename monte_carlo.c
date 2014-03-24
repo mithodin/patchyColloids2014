@@ -60,44 +60,43 @@ double pairPotential(Colloid *particle, int *collision){
 	return u;
 }
 
-void initDmax(Colloid *carray){
-	double d = dmax; //just storing this for later reference
+void initDmax(Colloid *carray, Config *c, FILE *out){
+	double d = c->dmax; //just storing this for later reference
 	double u[maxspan] = {0};
 	double pnow = paccept;
 	int i=-1;
 	do{
 		++i;
-		d = dmax;
-		dmax = 0;
-		pnow = monteCarloSteps(carray,4000);
-		amax *= pnow/paccept;
-		amax = amax > 2.0*M_PI ? 2.0*M_PI : amax; //for high temperatures, amax is practically meaningless
-		dmax = d;
-		pnow = monteCarloSteps(carray,4000);
-		dmax *= pnow/paccept;
-		Utot = totalEnergy(carray,&Uext,&Uint);
-		u[i%maxspan] = Uint;
-		printf("%s Uint: %f Avg: %f paccept: %f\n",progress,Uint,avg(u,i),pnow);
-	}while( ( i < maxspan || fabs(Uint/avg(u,i) - 1.0) > maxEnergyDeviation ) && i < 500);
-	printf("%s Equilibrium reached\n",progress);
-	ineq = true;
+		d = c->dmax;
+		c->dmax = 0;
+		pnow = monteCarloSteps(carray,4000,NULL);
+		c->amax *= pnow/paccept;
+		c->amax = c->amax > 2.0*M_PI ? 2.0*M_PI : c->amax; //for high temperatures, amax is practically meaningless
+		c->dmax = d;
+		pnow = monteCarloSteps(carray,4000,NULL);
+		c->dmax *= pnow/paccept;
+		c->Utot = totalEnergy(carray,&(c->Uext),&(c->Uint));
+		u[i%maxspan] = c->Uint;
+		fprintf(out,"Uint: %f Avg: %f paccept: %f\n",c->Uint,avg(u,i),pnow);
+	}while( ( i < maxspan || fabs(c->Uint/avg(u,i) - 1.0) > maxEnergyDeviation ) && i < 500);
+	fprintf(out,"Equilibrium reached\n");
 
-	d = dmax;
-	dmax = 0.0;
+	d = c->dmax;
+	c->dmax = 0.0;
 	do{
-		pnow = monteCarloSteps(carray,4000);
-		amax *= pnow/angularPaccept;
-		printf("%s paccept: %f, amax = %e\n",progress,pnow,amax);
-	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation && amax <= 2.0*M_PI);
-	printf("%s Found amax = %e\n",progress,amax);
+		pnow = monteCarloSteps(carray,4000,NULL);
+		c->amax *= pnow/angularPaccept;
+		fprintf(out,"paccept: %f, amax = %e\n",progress,pnow,c->amax);
+	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation && c->amax <= 2.0*M_PI);
+	fprintf(out,"Found amax = %e\n",c->amax);
 
-	dmax = d;
+	c->dmax = d;
 	do{
-		pnow = monteCarloSteps(carray,4000);
-		dmax *= pnow/paccept;
-		printf("%s paccept: %f, dmax = %e\n",progress,pnow,dmax);
+		pnow = monteCarloSteps(carray,4000,NULL);
+		c->dmax *= pnow/paccept;
+		fprintf(out,"paccept: %f, dmax = %e\n",pnow,c->dmax);
 	}while(fabs(pnow/paccept - 1.0) > maxAccDeviation);
-	printf("%s Using dmax = %e, amax = %e PI at paccept = %f\n",progress,dmax,amax/M_PI,pnow);
+	fprintf(out,"Using dmax = %e, amax = %e PI at paccept = %f\n",c->dmax,c->amax/M_PI,pnow);
 }
 
 double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array here!
@@ -117,7 +116,7 @@ double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array
 	return utot;
 }
 
-double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance rate
+double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns acceptance rate
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0;	
@@ -128,14 +127,14 @@ double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance ra
 		oldz = carray[i].z;
 		olda = carray[i].a;
 
-		carray[i].z = realZ(carray[i].z+dmax*(genrand_real1()*2.0-1.0));
-		carray[i].x = realZ(carray[i].x+dmax*(genrand_real1()*2.0-1.0));
-		carray[i].a = carray[i].a + (2.0*genrand_real2()-1.0)*amax;
+		carray[i].z = realZ(carray[i].z+c->dmax*(genrand_real1()*2.0-1.0));
+		carray[i].x = realZ(carray[i].x+c->dmax*(genrand_real1()*2.0-1.0));
+		carray[i].a = carray[i].a + (2.0*genrand_real2()-1.0)*(c->amax);
 
 		reSortX(&carray[i]);
 		reSortZ(&carray[i]);
 
-		du = deltaU(&carray[i], &collision);
+		du = deltaU(&carray[i], &collision, c);
 
 		if( collision || !accept(du) ){
 			carray[i].x = oldx;
@@ -144,19 +143,19 @@ double monteCarloStep(Colloid *carray, bool statUpdate){ //returns acceptance ra
 			reSortX(&carray[i]);
 			reSortZ(&carray[i]);
 		}else{
-			carray[i].vext = extPotential(&carray[i],&collision);
-			carray[i].vint = pairPotential(&carray[i],&collision);
+			carray[i].vext = extPotential(&carray[i],&collision,c);
+			carray[i].vint = pairPotential(&carray[i],&collision,c);
 			p += 1.0;
 		}
-		if ( statUpdate ){
-			updateDensity(carray[i].z,carray[i].sp);
-			updateF(carray[i].z,carray[i].vint/(-U0),carray[i].sp);
+		if ( stats ){
+			updateDensity(carray[i].z,carray[i].sp,stats);
+			updateF(carray[i].z,carray[i].vint/(-U0),carray[i].sp,stats);
 		}
 	}
 	return p/N;
 }
 
-double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
+double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FILE *out){ //return acceptance rate
 	bool verbose = false;
 	double p=0;
 	int i = 0;
@@ -167,10 +166,10 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		if ( verbose ) printf("%s Running %1.0e steps (eta: %dh %dmin %ds)\n[",progress,(double)howmany,hours,minutes,(int)ceil(sETA));
+		if ( verbose ) fprintf(out,"%s Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
 		verbose = true;
-		printf("%s Running %1.0e steps\n[",progress,(double)howmany);
+		fprintf(out,"Running %1.0e steps\n[",(double)howmany);
 	}
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);
@@ -179,30 +178,30 @@ double monteCarloSteps(Colloid *carray, int howmany){ //return acceptance rate
 	for(i = 0; i < 100; ++i){
 		if( verbose ){
 			if( i%10 == 0){
-				printf("%d%%",i);
+				fprintf(out,"%d%%",i);
 			}else{
-				printf(".");
+				fprintf(out,".");
 			}
-			fflush(stdout);
+			fflush(out);
 		}
 		for(k = 0; k < onePerc; ++k){
-			if ( ineq && j%100 == 0 ){
-				p+=monteCarloStep(carray,true);
+			if ( j%100 == 0 ){
+				p+=monteCarloStep(carray,c,stats);
 			}else{
-				p+=monteCarloStep(carray,false);
+				p+=monteCarloStep(carray,c,NULL);
 			}
 			++j;
 		}
 	}
 	gettimeofday(&stop,NULL);
-	if (verbose ) printf("100%%]\n");
+	if (verbose ) fprintf(out,"100%%]\n");
 	double secs = (stop.tv_sec - start.tv_sec) + (double)(stop.tv_usec - start.tv_usec)/10e6;
 	simRate=((double)howmany)/secs;
 	int hours = (int)floor(secs/60.0/60.0);
 	secs -= hours*60*60;
 	int minutes = (int)floor(secs/60.0);
 	secs -= minutes*60;
-	if (verbose ) printf("%s Time elapsed: %dh %dmin %fs\n",progress,hours,minutes,secs);
+	if (verbose ) fprintf(out,"Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
 	return p/howmany;
 }
 

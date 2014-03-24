@@ -11,19 +11,18 @@ void *newThread(void *params){
 	FILE *out = fopen(c->out,"w");
 	Colloid *particles = (Colloid *)malloc(sizeof(Colloid)*(c->N));
 	Stats *stat = initStats(c->height);
-	initDmax(particles,c);
+	initDmax(particles,c,out);
 	
 	double pacc=monteCarloSteps(particles,c->steps,c,stat);
-	fprintf(c->out,"Overall acceptance rate: %f\n",pacc);
+	fprintf(out,"Overall acceptance rate: %f\n",pacc);
 
-	double Uext=0, Uint=0;
-	double Utot = totalEnergy(particles, &Uext, &Uint);
-	fprintf(c->out,"Total Energy: %f\n",Utot);
+	c->Utot = totalEnergy(particles, &(c->Uext), &(c->Uint));
+	fprintf(out,"Total Energy: %f\n",c->Utot);
 
 	printPositions(c->posOut, particles, pacc);
 	printStats(c->statOut, particles);
 
-	if(collisions(particles)) fprintf(c->out,"Collision detected in final state!\n");
+	if(collisions(particles)) fprintf(out,"Collision detected in final state!\n");
 	
 	*done = 1;
 
