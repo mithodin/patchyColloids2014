@@ -1,5 +1,11 @@
 #!/bin/bash
 num=`ls positions*png 2> /dev/null | wc -l | bc`
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+	open="eom"
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	open="open"
+fi
 
 for datei in `ls positions*dat`
 	do
@@ -10,7 +16,7 @@ for datei in `ls positions*dat`
 	gnuplot plotPositions.gnu
 	mv positions.dat $datei
 	mv statistics.dat statistics-$vars
-	eom bonds$num.png density$num.png positions$num.png
+	$open bonds$num.png density$num.png positions$num.png
 	num=$(( $num + 1 ))
 	echo $num
 done
