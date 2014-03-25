@@ -1,4 +1,4 @@
-void initParticles(Colloid *);
-void initRandomly(Colloid *);
-void initFromFile(Colloid *);
-int noCollision(int, Colloid *);
+void initParticles(Colloid *, Config *);
+void initRandomly(Colloid *, Config *);
+void initFromFile(Colloid *, Config *);
+int noCollision(int, Colloid *, Config *);

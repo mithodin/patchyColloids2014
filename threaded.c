@@ -1,30 +1,37 @@
-#include <pthreads.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "config.h"
+#include "colloid.h"
+#include "statistics.h"
 #include "parameters.h"
 #include "monte_carlo.h"
-#include "statistics.h"
 #include "initialize.h"
 
-void printPositions(char[40], Colloid *, double);
+void printPositions(Colloid *, double, Config *);
 
 void *newThread(void *params){
 	Config *c = (Config *)params;
 	FILE *out = fopen(c->out,"w");
 	Colloid *particles = (Colloid *)malloc(sizeof(Colloid)*(c->N));
+	initParticles(particles,c);
+	fprintf(out,"Particles initialized!\n");
+
 	Stats *stat = initStats(c->height);
 	initDmax(particles,c,out);
 	
-	double pacc=monteCarloSteps(particles,c->steps,c,stat);
+	double pacc=monteCarloSteps(particles,c->steps,c,stat,out);
 	fprintf(out,"Overall acceptance rate: %f\n",pacc);
 
-	c->Utot = totalEnergy(particles, &(c->Uext), &(c->Uint));
+	c->Utot = totalEnergy(particles, c);
 	fprintf(out,"Total Energy: %f\n",c->Utot);
 
-	printPositions(c->posOut, particles, pacc);
-	printStats(c->statOut, particles);
+	printPositions(particles, pacc,c);
+	printStats(particles, c->height, stat, c->statOut);
 
-	if(collisions(particles)) fprintf(out,"Collision detected in final state!\n");
+	if(collisions(particles,c)) fprintf(out,"Collision detected in final state!\n");
 	
-	*done = 1;
+	*(c->done) = 1;
 
 	free(particles);
 	free(stat);
@@ -33,12 +40,12 @@ void *newThread(void *params){
 	pthread_exit(0);
 }
 
-void printPositions(char fn[40], Colloid *particles, double paccept){
-	FILE *posFile = fopen(fn,"w");
+void printPositions(Colloid *particles, double paccept, Config *c){
+	FILE *posFile = fopen(c->posOut,"w");
 	int i=0;
-	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tg = %f\tT = %f\tSteps = %d\tAcceptance Rate = %f\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps,paccept);
+	fprintf(posFile,"#N = %d\tN1 = %d\tN2 = %d\tU0 = %f\tM1 = %f\tM2 = %f\theight = %f\twidth = %f\tg = %f\tT = %f\tSteps = %d\tAcceptance Rate = %f\n",c->N,c->N1,c->N2,U0,M1,c->M2,c->height,c->width,c->g,c->T,c->steps,paccept);
 	fprintf(posFile,"#x\tz\tangle\tspecies (3patch: %d)\n",THREEPATCH);
-	for(i=0;i<N;i++){
+	for(i=0;i<c->N;i++){
 		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
 	}
 	fclose(posFile);

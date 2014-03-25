@@ -9,15 +9,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libconfig.h> 	//We are using this to load our parameters from a file.
-#include <pthreads.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "mt19937ar.h" 	//Generating random numbers
+#include "config.h"
 #include "colloid.h" 	//What is a colloid?
+#include "statistics.h"
 #include "initialize.h"	//Initialization
 #include "load_config.h" //Loading the configuration
 #include "monte_carlo.h"
-#include "statistics.h"
-#include "config.h"
+#include "threaded.h"
 
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
@@ -36,13 +38,14 @@ const double delta = 0.11965683746373795115; //Patch diameter
 //const double delta = 0.2;
 const double sigma = 1.0; //Colloid diameter
 double g;
+int steps;
 // END PARAMS
 
 FILE *initFile = NULL;
 char fn[40];
 char statFn[40];
 
-int main(int argc, char* argv){
+int main(int argc, char** argv){
 	int maxThreads = 1;
 	pthread_t *threads;
 	volatile int *done;
@@ -70,42 +73,31 @@ int main(int argc, char* argv){
 	int realindex = 0;
 	int result = 0;
 	pthread_attr_t at;
-	while( ( index = loadParams() ) ){;
+	Config **c = (Config **)malloc(sizeof(Config *));
+	while( ( index = loadParams(c) ) ){;
 		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\ng = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps);
-		Config *c = (Config *)malloc(sizeof(Config));
-		c->N = N;
-		c->N1 = N1;
-		c->N2 = N2;
-		c->M2 = M2;
-		c->height = height;
-		c->width = width;
-		c->g = g;
-		c->steps = steps;
-		c->dmax = 0.5;
-		c->amax = 1e-1*2.0/3.0*M_PI;
-		sprintf(c->out,"%d.stdout",index);
-		
 		if(index > maxThreads){
 			realindex = -1;
 			do{
 				for(realindex = 0;realindex < maxThreads;++realindex){
 					if(done[realindex]){
-						pthread_join(threads[realindex],&result);
+						pthread_join(threads[realindex],(void *)&result);
 						if( result ) printf("Warning: Nonzero exit of thread %d\n",realindex);
 						goto freethreadfound;
 					}
 				}
-				nanosleep(2e9); //sleep two seconds
-			}while(true);
+				sleep(2);
+			}while(1);
 		}else{
 			realindex = index-1;
 		}
 		freethreadfound:
-		c->done = &done[realindex];
+		(*c)->done = &done[realindex];
+		sprintf((*c)->out,"%d.stdout",index);
 
-		at = pthread_attr_init();
-		pthread_attr_setdetachstate(at, PTHREAD_CREATE_JOINABLE);
-		int rc = pthread_create(&threads[realindex],at,newThread,(void *)c);
+		pthread_attr_init(&at);
+		pthread_attr_setdetachstate(&at, PTHREAD_CREATE_JOINABLE);
+		int rc = pthread_create(&threads[realindex],&at,newThread,(void *)c);
 		if( rc ) printf("Error creating thread %d\n",realindex);
 	}
 	pthread_exit(NULL);

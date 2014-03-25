@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "config.h"
 #include "colloid.h"
 #include "parameters.h"
 #include "statistics.h"
@@ -11,17 +12,17 @@ void norm(Stats *stat);
 Stats *initStats(int bin){
 	Stats *stat = malloc(sizeof(Stats));
 	stat->bins = bin;
-	stat->rho1 = (double *)calloc(bins,sizeof(double));
-	stat->rho2 = (double *)calloc(bins,sizeof(double));
-	stat->f1 = (double *)calloc(bins,sizeof(double));
-	stat->f2 = (double *)calloc(bins,sizeof(double));
+	stat->rho1 = (double *)calloc(bin,sizeof(double));
+	stat->rho2 = (double *)calloc(bin,sizeof(double));
+	stat->f1 = (double *)calloc(bin,sizeof(double));
+	stat->f2 = (double *)calloc(bin,sizeof(double));
 	stat->M1 = 0;
 	stat->M2 = 0;
 	return stat;
 }
 
 void printStats(Colloid *carray, double height, Stats *stat, char *statFn){
-	norm();
+	norm(stat);
 	FILE *statFile = fopen(statFn,"w");
 	if( statFile ){
 		int i;

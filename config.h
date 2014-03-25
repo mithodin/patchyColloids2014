@@ -1,5 +1,5 @@
 struct conf{
-	*int done;
+	volatile int *done;
 	int N;
 	int N1;
 	int N2;

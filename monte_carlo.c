@@ -1,12 +1,14 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <sys/time.h>
+#include "config.h"
 #include "colloid.h"
+#include "statistics.h"
 #include "monte_carlo.h"
 #include "parameters.h"
 #include "distance.h"
 #include "mt19937ar.h"
-#include "statistics.h"
 
 const double paccept = 0.2;
 const double angularPaccept = 0.4;
@@ -17,26 +19,26 @@ const int maxspan = 10;
 
 double avg(double *, int);
 
-double extPotential(Colloid *colloid, int *collision, double g){
+double extPotential(Colloid *colloid, int *collision, Config *c){
 	*collision = 0;
 	if( colloid->z < 0.5 || colloid->z > c->height-0.5 ){
 		*collision = 1;
 		return 0; //invalid
 	}
-	return colloid->z*(colloid->sp == THREEPATCH ? M1 : M2)*g;
+	return colloid->z*(colloid->sp == THREEPATCH ? M1 : c->M2)*c->g;
 }
 
-double pairPotential(Colloid *particle, int *collision){
+double pairPotential(Colloid *particle, int *collision, Config *c){
 	Colloid *partner = particle;
 	double x = (*particle).x;
 	double z = (*particle).z;
 	double u = 0;
 	int col = 0;
 	*collision = 0;
-	while( fabs(realDx(x - (*(*partner).left).x)) <= sigma+delta ){
+	while( fabs(realDx(x - (*(*partner).left).x, c->width)) <= sigma+delta ){
 		partner = (*partner).left;
 		if( fabs(z - (*partner).z) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col);
+			u += pairInteraction(particle,partner,&col,c);
 			if(col){
 			 	*collision = 1;
 				return 0; //We are in an invalid state!
@@ -44,10 +46,10 @@ double pairPotential(Colloid *particle, int *collision){
 		}
 	}
 	partner = particle;
-	while( fabs(realDx(x - (*(*partner).right).x)) <= sigma+delta ){
+	while( fabs(realDx(x - (*(*partner).right).x, c->width)) <= sigma+delta ){
 		partner = (*partner).right;
 		if( fabs(z - (*partner).z) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col);
+			u += pairInteraction(particle,partner,&col,c);
 			if(col){
 				*collision = 1;
 				return 0; //We are in an invalid state!
@@ -66,13 +68,13 @@ void initDmax(Colloid *carray, Config *c, FILE *out){
 		++i;
 		d = c->dmax;
 		c->dmax = 0;
-		pnow = monteCarloSteps(carray,4000,NULL);
+		pnow = monteCarloSteps(carray,4000,c,NULL,NULL);
 		c->amax *= pnow/paccept;
 		c->amax = c->amax > 2.0*M_PI ? 2.0*M_PI : c->amax; //for high temperatures, amax is practically meaningless
 		c->dmax = d;
-		pnow = monteCarloSteps(carray,4000,NULL);
+		pnow = monteCarloSteps(carray,4000,c,NULL,NULL);
 		c->dmax *= pnow/paccept;
-		c->Utot = totalEnergy(carray,&(c->Uext),&(c->Uint));
+		c->Utot = totalEnergy(carray,c);
 		u[i%maxspan] = c->Uint;
 		fprintf(out,"Uint: %f Avg: %f paccept: %f\n",c->Uint,avg(u,i),pnow);
 	}while( ( i < maxspan || fabs(c->Uint/avg(u,i) - 1.0) > maxEnergyDeviation ) && i < 500);
@@ -81,35 +83,35 @@ void initDmax(Colloid *carray, Config *c, FILE *out){
 	d = c->dmax;
 	c->dmax = 0.0;
 	do{
-		pnow = monteCarloSteps(carray,4000,NULL);
+		pnow = monteCarloSteps(carray,4000,c,NULL,NULL);
 		c->amax *= pnow/angularPaccept;
-		fprintf(out,"paccept: %f, amax = %e\n",progress,pnow,c->amax);
+		fprintf(out,"paccept: %f, amax = %e\n",pnow,c->amax);
 	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation && c->amax <= 2.0*M_PI);
 	fprintf(out,"Found amax = %e\n",c->amax);
 
 	c->dmax = d;
 	do{
-		pnow = monteCarloSteps(carray,4000,NULL);
+		pnow = monteCarloSteps(carray,4000,c,NULL,NULL);
 		c->dmax *= pnow/paccept;
 		fprintf(out,"paccept: %f, dmax = %e\n",pnow,c->dmax);
 	}while(fabs(pnow/paccept - 1.0) > maxAccDeviation);
 	fprintf(out,"Using dmax = %e, amax = %e PI at paccept = %f\n",c->dmax,c->amax/M_PI,pnow);
 }
 
-double totalEnergy(Colloid *carray, double *uext, double *uint, Config *c){ //Give an Array here!
+double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	double utot = 0;
-	*uext = 0;
-	*uint = 0;
+	c->Uext = 0;
+	c->Uint = 0;
 	int collision = 0;
 	int i = 0;
-	for(i = 0;i < N; ++i){
-		carray[i].vext = extPotential(&carray[i],&collision,c->g);
-		carray[i].vint = pairPotential(&carray[i],&collision);
-		*uext += carray[i].vext;
-		*uint += carray[i].vint;
+	for(i = 0;i < c->N; ++i){
+		carray[i].vext = extPotential(&carray[i],&collision,c);
+		carray[i].vint = pairPotential(&carray[i],&collision,c);
+		c->Uext += carray[i].vext;
+		c->Uint += carray[i].vint;
 	}
-	*uint /= 2.0;
-	utot = *uext + *uint;
+	c->Uint /= 2.0;
+	utot = c->Uext + c->Uint;
 	return utot;
 }
 
@@ -119,17 +121,17 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	double du = 0;	
 	int collision = 0;
 	int i=0;
-	for(i = 0; i < N; ++i){
+	for(i = 0; i < c->N; ++i){
 		oldx = carray[i].x;
 		oldz = carray[i].z;
 		olda = carray[i].a;
 
-		carray[i].z = realZ(carray[i].z+c->dmax*(genrand_real1()*2.0-1.0));
-		carray[i].x = realZ(carray[i].x+c->dmax*(genrand_real1()*2.0-1.0));
+		carray[i].z = realZ(carray[i].z+c->dmax*(genrand_real1()*2.0-1.0),c->height);
+		carray[i].x = realZ(carray[i].x+c->dmax*(genrand_real1()*2.0-1.0),c->width);
 		carray[i].a = carray[i].a + (2.0*genrand_real2()-1.0)*(c->amax);
 
-		reSortX(&carray[i]);
-		reSortZ(&carray[i]);
+		reSortX(&carray[i], c);
+		reSortZ(&carray[i], c);
 
 		du = deltaU(&carray[i], &collision, c);
 
@@ -137,19 +139,19 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			carray[i].x = oldx;
 			carray[i].z = oldz;
 			carray[i].a = olda;
-			reSortX(&carray[i]);
-			reSortZ(&carray[i]);
+			reSortX(&carray[i],c);
+			reSortZ(&carray[i],c);
 		}else{
-			carray[i].vext = extPotential(&carray[i],&collision,c->g);
-			carray[i].vint = pairPotential(&carray[i],&collision);
+			carray[i].vext = extPotential(&carray[i],&collision,c);
+			carray[i].vint = pairPotential(&carray[i],&collision,c);
 			p += 1.0;
 		}
 		if ( stats ){
-			updateDensity(carray[i].z,carray[i].sp,stats);
-			updateF(carray[i].z,carray[i].vint/(-U0),carray[i].sp,stats);
+			updateDensity(carray[i].z,carray[i].sp,c,stats);
+			updateF(carray[i].z,carray[i].vint/(-U0),carray[i].sp,c,stats);
 		}
 	}
-	return p/N;
+	return p/c->N;
 }
 
 double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FILE *out){ //return acceptance rate
@@ -163,7 +165,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		if ( verbose ) fprintf(out,"%s Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
+		if ( verbose ) fprintf(out,"Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
 		verbose = true;
 		fprintf(out,"Running %1.0e steps\n[",(double)howmany);
@@ -214,9 +216,9 @@ double deltaU(Colloid *colloid, int *collision, Config *c){
 	double du = 0;
 	int col = 0;
 	*collision = 0;
-	du = extPotential(colloid,&col,c->g) - colloid->vext;
+	du = extPotential(colloid,&col,c) - colloid->vext;
 	*collision += col;
-	du += pairPotential(colloid, &col) - colloid->vint;
+	du += pairPotential(colloid, &col,c) - colloid->vint;
 	*collision += col;
 	return du;
 }

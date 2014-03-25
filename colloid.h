@@ -30,12 +30,12 @@ void swapRight(Colloid *);
 void swapLeft(Colloid *);
 void swapUp(Colloid *);
 void swapDown(Colloid *);
-void reSortX(Colloid *);
-void reSortZ(Colloid *);
+void reSortX(Colloid *, Config *c);
+void reSortZ(Colloid *, Config *c);
 
-double colloidDistance(Colloid *, Colloid *);
+double colloidDistance(Colloid *, Colloid *, Config *c);
 double patchPositionX(Colloid *, int);
 double patchPositionZ(Colloid *, int);
 int patches(Colloid *);
-double pairInteraction(Colloid *, Colloid *, int *);
-int collisions(Colloid *);
+double pairInteraction(Colloid *, Colloid *, int *, Config *);
+int collisions(Colloid *, Config *c);

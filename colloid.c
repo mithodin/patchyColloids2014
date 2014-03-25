@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "config.h"
 #include "colloid.h"
 #include "parameters.h"
 #include "distance.h"
@@ -79,11 +80,11 @@ void makePeriodicX(Colloid *list){
 	(*last).right = first;
 }
 
-void reSortX(Colloid *list){ //Point to the changed element!
-	while( realDx( (*list).x - (*(*list).right).x ) > 0 ){
+void reSortX(Colloid *list, Config *c){ //Point to the changed element!
+	while( realDx( (*list).x - (*(*list).right).x, c->width ) > 0 ){
 		swapRight(list);
 	}
-	while( realDx( (*list).x - (*(*list).left).x ) < 0 ){
+	while( realDx( (*list).x - (*(*list).left).x, c->width ) < 0 ){
 		swapLeft(list);
 	}
 }
@@ -161,7 +162,7 @@ void printColloidsSortedZ(Colloid *list){
 	printf("\n");
 }
 
-void reSortZ(Colloid *list){ //Point to the changed element!
+void reSortZ(Colloid *list, Config *c){ //Point to the changed element!
 	while( list->above && list->z > list->above->z ){
 		swapUp(list);
 	}
@@ -192,8 +193,8 @@ void swapDown(Colloid *list){
 	(*curBelow).below = list;
 }
 
-double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
-	double d = colloidDistance(c1,c2);
+double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Config *c){
+	double d = colloidDistance(c1,c2,c);
 	*collision = 0;
 	if(d > sigma+delta){ return 0.0; }
 	else if(d < sigma ){ 
@@ -210,7 +211,7 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
 				double p2X = patchPositionX(c2,j);
 				double p2Z = patchPositionZ(c2,j);
 				
-				d = distance(p1X,p1Z,p2X,p2Z);
+				d = distance(p1X,p1Z,p2X,p2Z,c);
 				if( d <= delta ){
 					return -U0;
 				}
@@ -220,8 +221,8 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
 	}
 }
 
-double colloidDistance(Colloid *c1, Colloid *c2){
-	return distance((*c1).x,(*c1).z,(*c2).x,(*c2).z);
+double colloidDistance(Colloid *c1, Colloid *c2, Config *c){
+	return distance((*c1).x,(*c1).z,(*c2).x,(*c2).z,c);
 }
 
 double patchPositionX(Colloid *c, int which){
@@ -252,11 +253,11 @@ int patches(Colloid *c){
 	}
 }
 
-int collisions(Colloid *carray){
+int collisions(Colloid *carray, Config *c){
 	int i=0,j=0;
-	for(i = 0; i<N; ++i){
-		for(j = i+1; j < N; j++){
-			if(colloidDistance(&carray[i], &carray[j]) < sigma ){
+	for(i = 0; i<c->N; ++i){
+		for(j = i+1; j < c->N; j++){
+			if(colloidDistance(&carray[i], &carray[j],c) < sigma ){
 				return 1;
 			}
 		}
