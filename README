@@ -6,3 +6,5 @@ How to build:
  * Then execute 'make'
 
 You should now have an executable 'patchy_main' in the 'bin' folder.
+Usage: ./patchy_main x
+Where x is the number of concurrent threads to run
