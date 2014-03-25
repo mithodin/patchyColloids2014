@@ -18,10 +18,6 @@ int comp_length = 0;
 double x;
 double lastT,lastM2,lastG,lastX,lastN;
 
-extern char fn[40];
-extern char statFn[40];
-extern FILE *initFile;
-
 config_t *getParams(void){ //loads the params from a file
 	parameters=(struct config_t*)malloc(sizeof(struct config_t));
 
@@ -39,18 +35,11 @@ config_t *getParams(void){ //loads the params from a file
 	}
 }
 
-//Maybe I will extend this to handle arrays of parameters.
 int loadParams(Config **c){ //We are relying on the fact that params is a valid config_t pointer
 	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0;
 	double T,x,M2,g,height,width;
 	*c=(Config *)malloc(sizeof(Config));
 	if(!loaded){
-		const char *infile;
-		if(config_lookup_string(parameters,"init",&infile) == CONFIG_TRUE){
-			if(strcmp(infile,"random") != 0){
-				initFile = fopen(infile, "r");
-			}
-		}
 		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE) N = -1;
 		if(config_lookup_int(parameters,"N1",&N1) == CONFIG_FALSE) N1 = -1;
 		if(config_lookup_int(parameters,"N2",&N2) == CONFIG_FALSE) N2 = -1;

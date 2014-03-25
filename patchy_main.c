@@ -41,10 +41,6 @@ double g;
 int steps;
 // END PARAMS
 
-FILE *initFile = NULL;
-char fn[40];
-char statFn[40];
-
 int main(int argc, char** argv){
 	int maxThreads = 1;
 	pthread_t *threads;
@@ -75,7 +71,6 @@ int main(int argc, char** argv){
 	pthread_attr_t at;
 	Config **c = (Config **)malloc(sizeof(Config *));
 	while( ( index = loadParams(c) ) ){;
-		printf("N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\ng = %f\nT = %f\nSteps = %d\n",N,N1,N2,U0,M1,M2,height,width,g,T,steps);
 		if(index > maxThreads){
 			realindex = -1;
 			do{
@@ -93,11 +88,12 @@ int main(int argc, char** argv){
 		}
 		freethreadfound:
 		(*c)->done = &done[realindex];
+		((*c)->done) = 0;
 		sprintf((*c)->out,"%d.stdout",index);
 
 		pthread_attr_init(&at);
 		pthread_attr_setdetachstate(&at, PTHREAD_CREATE_JOINABLE);
-		int rc = pthread_create(&threads[realindex],&at,newThread,(void *)c);
+		int rc = pthread_create(&threads[realindex],&at,newThread,(void *)(*c));
 		if( rc ) printf("Error creating thread %d\n",realindex);
 		else printf("Thread %d started.\n",realindex);
 	}

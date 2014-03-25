@@ -11,33 +11,42 @@
 void printPositions(Colloid *, double, Config *);
 
 void *newThread(void *params){
+	printf("I'm alive!\n");
 	Config *c = (Config *)params;
-	FILE *out = fopen(c->out,"w");
+	FILE *out = fopen(c->out,"a");
+	if( !out ){
+		printf("Error opening output file\n");
+		fclose(out);
+		pthread_exit((void *)1);
+	}
 	Colloid *particles = (Colloid *)malloc(sizeof(Colloid)*(c->N));
+	//fprintf(out,"Initializing particles\n");
 	initParticles(particles,c);
-	fprintf(out,"Particles initialized!\n");
+	//fprintf(out,"Particles initialized!\n");
 
 	Stats *stat = initStats(c->height);
 	initDmax(particles,c,out);
 	
+	printf("Running simulation\n");
 	double pacc=monteCarloSteps(particles,c->steps,c,stat,out);
-	fprintf(out,"Overall acceptance rate: %f\n",pacc);
+	//fprintf(out,"Overall acceptance rate: %f\n",pacc);
 
 	c->Utot = totalEnergy(particles, c);
-	fprintf(out,"Total Energy: %f\n",c->Utot);
+	//fprintf(out,"Total Energy: %f\n",c->Utot);
 
 	printPositions(particles, pacc,c);
 	printStats(particles, c->height, stat, c->statOut);
 
-	if(collisions(particles,c)) fprintf(out,"Collision detected in final state!\n");
+	if(collisions(particles,c)) //fprintf(out,"Collision detected in final state!\n");
 	
+	printf("I'm done!\n");
 	*(c->done) = 1;
 
 	free(particles);
 	free(stat);
 	fclose(out);
 	free(c);
-	pthread_exit(0);
+	pthread_exit((void *)0);
 }
 
 void printPositions(Colloid *particles, double paccept, Config *c){

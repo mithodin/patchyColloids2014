@@ -75,26 +75,26 @@ void initDmax(Colloid *carray, Config *c, FILE *out){
 		c->dmax *= pnow/paccept;
 		c->Utot = totalEnergy(carray,c);
 		u[i%maxspan] = c->Uint;
-		fprintf(out,"Uint: %f Avg: %f paccept: %f\n",c->Uint,avg(u,i),pnow);
+		//fprintf(out,"Uint: %f Avg: %f paccept: %f\n",c->Uint,avg(u,i),pnow);
 	}while( ( i < maxspan || fabs(c->Uint/avg(u,i) - 1.0) > maxEnergyDeviation ) && i < 500);
-	fprintf(out,"Equilibrium reached\n");
+	//fprintf(out,"Equilibrium reached\n");
 
 	d = c->dmax;
 	c->dmax = 0.0;
 	do{
 		pnow = monteCarloSteps(carray,4000,c,NULL,NULL);
 		c->amax *= pnow/angularPaccept;
-		fprintf(out,"paccept: %f, amax = %e\n",pnow,c->amax);
+		//fprintf(out,"paccept: %f, amax = %e\n",pnow,c->amax);
 	}while(fabs(pnow/angularPaccept - 1.0) > maxAccDeviation && c->amax <= 2.0*M_PI);
-	fprintf(out,"Found amax = %e\n",c->amax);
+	//fprintf(out,"Found amax = %e\n",c->amax);
 
 	c->dmax = d;
 	do{
 		pnow = monteCarloSteps(carray,4000,c,NULL,NULL);
 		c->dmax *= pnow/paccept;
-		fprintf(out,"paccept: %f, dmax = %e\n",pnow,c->dmax);
+		//fprintf(out,"paccept: %f, dmax = %e\n",pnow,c->dmax);
 	}while(fabs(pnow/paccept - 1.0) > maxAccDeviation);
-	fprintf(out,"Using dmax = %e, amax = %e PI at paccept = %f\n",c->dmax,c->amax/M_PI,pnow);
+	//fprintf(out,"Using dmax = %e, amax = %e PI at paccept = %f\n",c->dmax,c->amax/M_PI,pnow);
 }
 
 double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
@@ -164,10 +164,10 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
 		sETA -= minutes*60;
-		if ( verbose ) fprintf(out,"Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
+		//if ( verbose ) //fprintf(out,"Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
 	}else{
 		verbose = true;
-		fprintf(out,"Running %1.0e steps\n[",(double)howmany);
+		//fprintf(out,"Running %1.0e steps\n[",(double)howmany);
 	}
 	struct timeval start,stop;
 	gettimeofday(&start,NULL);
@@ -176,11 +176,11 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	for(i = 0; i < 100; ++i){
 		if( verbose ){
 			if( i%10 == 0){
-				fprintf(out,"%d%%",i);
+				//fprintf(out,"%d%%",i);
 			}else{
-				fprintf(out,".");
+				//fprintf(out,".");
 			}
-			fflush(out);
+			//fflush(out);
 		}
 		for(k = 0; k < onePerc; ++k){
 			if ( j%100 == 0 ){
@@ -192,14 +192,14 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		}
 	}
 	gettimeofday(&stop,NULL);
-	if (verbose ) fprintf(out,"100%%]\n");
+	//if (verbose ) //fprintf(out,"100%%]\n");
 	double secs = (stop.tv_sec - start.tv_sec) + (double)(stop.tv_usec - start.tv_usec)/10e6;
 	c->simRate=((double)howmany)/secs;
 	int hours = (int)floor(secs/60.0/60.0);
 	secs -= hours*60*60;
 	int minutes = (int)floor(secs/60.0);
 	secs -= minutes*60;
-	if (verbose ) fprintf(out,"Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
+	//if (verbose ) //fprintf(out,"Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
 	return p/howmany;
 }
 

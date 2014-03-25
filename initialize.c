@@ -13,11 +13,7 @@
 extern FILE *initFile;
 
 void initParticles(Colloid *particles, Config *c){
-	if(initFile){
-		initFromFile(particles, c);
-	}else{
-		initRandomly(particles, c);
-	}
+	initRandomly(particles, c);
 	makePeriodicX(particles);
 	c->Utot = totalEnergy(particles, c);
 }
@@ -43,11 +39,6 @@ void initRandomly(Colloid *particles, Config *c){
 			i+=1;
 		}
 	}
-}
-
-//Currently not implemented
-void initFromFile(Colloid *particles, Config *c){
-	initRandomly(particles,c);
 }
 
 int noCollision(int i, Colloid *particles, Config *c){
