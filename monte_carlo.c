@@ -10,11 +10,12 @@
 #include "distance.h"
 #include "mt19937ar.h"
 
+#define maxspan 10
+
 const double paccept = 0.2;
 const double angularPaccept = 0.4;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
-const int maxspan = 10;
 
 double avg(double *, int);
 
