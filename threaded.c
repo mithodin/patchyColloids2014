@@ -24,12 +24,16 @@ void *newThread(void *params){
 	}
 	Colloid *particles = (Colloid *)malloc(sizeof(Colloid)*(c->N));
 	fprintf(out,"Initializing particles\n");
+	fflush(out);
 	initParticles(particles,c);
 	fprintf(out,"Particles initialized!\n");
+	fflush(out);
+	fclose(out);
 
 	Stats *stat = initStats(c->height);
-	initDmax(particles,c,out);
+	initDmax(particles,c);
 	
+	out = fopen(c->out,"a");
 	fprintf(out,"Running simulation\n");
 	fflush(out);
 	double pacc=monteCarloSteps(particles,c->steps,c,stat,out);

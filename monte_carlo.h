@@ -5,4 +5,4 @@ double monteCarloStep(Colloid *, Config*, Stats *);
 double monteCarloSteps(Colloid *, int, Config*, Stats *, FILE*);
 double deltaU(Colloid*, int*, Config*);
 int accept(double, double);
-void initDmax(Colloid*, Config*, FILE*);
+void initDmax(Colloid*, Config*);
