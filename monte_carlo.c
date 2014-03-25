@@ -168,7 +168,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	int i = 0;
 	if(c->simRate != 0){
 		double sETA = ((double)howmany)/c->simRate;
-		if(sETA > 10){ verbose = true; }
+		if( out && sETA > 10){ verbose = true; }
 		int hours = (int)floor(sETA/60.0/60.0);
 		sETA -= hours*60*60;
 		int minutes = (int)floor(sETA/60.0);
@@ -177,7 +177,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 			fprintf(out,"Running %1.0e steps (eta: %dh %dmin %ds)\n[",(double)howmany,hours,minutes,(int)ceil(sETA));
 			fflush(out);
 		}
-	}else{
+	}else if (out){
 		verbose = true;
 		fprintf(out,"Running %1.0e steps\n[",(double)howmany);
 		fflush(out);
