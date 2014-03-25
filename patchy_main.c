@@ -58,7 +58,7 @@ int main(int argc, char** argv){
 
 	int index = 0;
 	int realindex = 0;
-	int result = 0;
+	long result = 0;
 	pthread_attr_t at;
 	Config **c = (Config **)malloc(sizeof(Config *));
 	while( ( index = loadParams(c) ) ){
@@ -67,7 +67,7 @@ int main(int argc, char** argv){
 			while(1){
 				for(realindex = 0;realindex < maxThreads;++realindex){
 					if(done[realindex]){
-						pthread_join(threads[realindex],(void *)&result);
+						pthread_join(threads[realindex],(void *)result);
 						if( result ){
 							printf("Warning: Nonzero exit of thread %d\n",realindex);
 						}else{
@@ -93,9 +93,8 @@ int main(int argc, char** argv){
 		else printf("Thread %d started.\n",realindex);
 	}
 	int i;
-	maxThreads = maxThreads > index ? index : maxThreads;
 	for(i = 0;i<maxThreads;++i){
-		pthread_join(threads[i],(void *)&result);
+		pthread_join(threads[i],(void *)result);
 		if( result ) printf("Warning: Nonzero exit of thread %d\n",i);
 	}
 	printf("So long and thanks for all the fish...\n");
