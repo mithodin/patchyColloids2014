@@ -16,7 +16,9 @@ int m2_length = 0;
 int g_length = 0;
 int comp_length = 0;
 double x;
-double lastT,lastM2,lastG,lastX,lastN;
+double lastT,lastM2,lastG,lastX,lastWidth,lastHeight;
+int lastN,lastSteps;
+
 
 config_t *getParams(void){ //loads the params from a file
 	parameters=(struct config_t*)malloc(sizeof(struct config_t));
@@ -159,28 +161,34 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		}
 		N1 = lastN*x;
 		N2 = lastN*(x-1);
+		width = lastWidth;
+		height = lastHeight;
+		N = lastN;
+		steps = lastSteps;
 		++loaded;
+	}else{
+		return 0;
 	}
-	if( loaded ){
-		sprintf((*c)->posOut,"positions-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
-		sprintf((*c)->statOut,"statistics-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
-		(*c)->N = N;
-		(*c)->N1 = N1;
-		(*c)->N2 = N2;
-		(*c)->M2 = M2;
-		(*c)->height = height;
-		(*c)->width = width;
-		(*c)->T = T;
-		(*c)->steps = steps;
-		(*c)->g = g;
-		(*c)->simRate = 0;
-		lastT = T;
-		lastM2 = M2;
-		lastG = g;
-		lastX = x;
-		lastN = N;
-		printf("Config %d loaded!\n",loaded);
-		return loaded;
-	}
-	return 0;
+	sprintf((*c)->posOut,"positions-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
+	sprintf((*c)->statOut,"statistics-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
+	(*c)->N = N;
+	(*c)->N1 = N1;
+	(*c)->N2 = N2;
+	(*c)->M2 = M2;
+	(*c)->height = height;
+	(*c)->width = width;
+	(*c)->T = T;
+	(*c)->steps = steps;
+	(*c)->g = g;
+	(*c)->simRate = 0;
+	lastT = T;
+	lastM2 = M2;
+	lastG = g;
+	lastX = x;
+	lastN = N;
+	lastHeight = height;
+	lastWidth = width;
+	lastSteps = steps;
+	printf("Config %d loaded!\n",loaded);
+	return loaded;
 }

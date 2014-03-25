@@ -25,20 +25,11 @@ config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
 
 //PARAMS
-int N;
-int N1;
-int N2;
 const double M1 = 1;
-double M2;
-double height;
-double width;
-double T;
 const double U0 = 1;
 const double delta = 0.11965683746373795115; //Patch diameter
 //const double delta = 0.2;
 const double sigma = 1.0; //Colloid diameter
-double g;
-int steps;
 // END PARAMS
 
 int main(int argc, char** argv){
@@ -70,25 +61,29 @@ int main(int argc, char** argv){
 	int result = 0;
 	pthread_attr_t at;
 	Config **c = (Config **)malloc(sizeof(Config *));
-	while( ( index = loadParams(c) ) ){;
+	while( ( index = loadParams(c) ) ){
+		printf("index: %d\n",index);
 		if(index > maxThreads){
-			realindex = -1;
-			do{
+			while(1){
 				for(realindex = 0;realindex < maxThreads;++realindex){
 					if(done[realindex]){
 						pthread_join(threads[realindex],(void *)&result);
-						if( result ) printf("Warning: Nonzero exit of thread %d\n",realindex);
+						if( result ){
+							printf("Warning: Nonzero exit of thread %d\n",realindex);
+						}else{
+							printf("Found finished thread\n");
+						}
 						goto freethreadfound;
 					}
 				}
 				sleep(2);
-			}while(1);
+			}
 		}else{
 			realindex = index-1;
 		}
 		freethreadfound:
 		(*c)->done = &done[realindex];
-		((*c)->done) = 0;
+		done[realindex] = 0;
 		sprintf((*c)->out,"%d.stdout",index);
 
 		pthread_attr_init(&at);
