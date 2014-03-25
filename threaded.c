@@ -13,26 +13,32 @@ void printPositions(Colloid *, double, Config *);
 void *newThread(void *params){
 	printf("I'm alive!\n");
 	Config *c = (Config *)params;
-	FILE *out = fopen(c->out,"a");
+	FILE *out = fopen(c->out,"w");
 	if( !out ){
 		printf("Error opening output file\n");
 		fclose(out);
 		pthread_exit((void *)1);
+	}else{
+		fprintf(out,"Thread alive\n");
+		fflush(out);
 	}
 	Colloid *particles = (Colloid *)malloc(sizeof(Colloid)*(c->N));
-	//fprintf(out,"Initializing particles\n");
+	fprintf(out,"Initializing particles\n");
 	initParticles(particles,c);
-	//fprintf(out,"Particles initialized!\n");
+	fprintf(out,"Particles initialized!\n");
 
 	Stats *stat = initStats(c->height);
 	initDmax(particles,c,out);
 	
-	printf("Running simulation\n");
+	fprintf(out,"Running simulation\n");
+	fflush(out);
 	double pacc=monteCarloSteps(particles,c->steps,c,stat,out);
-	//fprintf(out,"Overall acceptance rate: %f\n",pacc);
+	fprintf(out,"Overall acceptance rate: %f\n",pacc);
+	fflush(out);
 
 	c->Utot = totalEnergy(particles, c);
-	//fprintf(out,"Total Energy: %f\n",c->Utot);
+	fprintf(out,"Total Energy: %f\n",c->Utot);
+	fflush(out);
 
 	printPositions(particles, pacc,c);
 	printStats(particles, c->height, stat, c->statOut);

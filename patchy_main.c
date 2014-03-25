@@ -62,7 +62,6 @@ int main(int argc, char** argv){
 	pthread_attr_t at;
 	Config **c = (Config **)malloc(sizeof(Config *));
 	while( ( index = loadParams(c) ) ){
-		printf("index: %d\n",index);
 		if(index > maxThreads){
 			while(1){
 				for(realindex = 0;realindex < maxThreads;++realindex){
