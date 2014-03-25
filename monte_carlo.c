@@ -17,13 +17,13 @@ const int maxspan = 10;
 
 double avg(double *, int);
 
-double extPotential(Colloid *c, int *collision){
+double extPotential(Colloid *colloid, int *collision, double g){
 	*collision = 0;
-	if( c->z < 0.5 || c->z > height-0.5 ){
+	if( colloid->z < 0.5 || colloid->z > c->height-0.5 ){
 		*collision = 1;
 		return 0; //invalid
 	}
-	return c->z*(c->sp == THREEPATCH ? M1 : M2)*g;
+	return colloid->z*(colloid->sp == THREEPATCH ? M1 : M2)*g;
 }
 
 double pairPotential(Colloid *particle, int *collision){
@@ -96,14 +96,14 @@ void initDmax(Colloid *carray, Config *c, FILE *out){
 	fprintf(out,"Using dmax = %e, amax = %e PI at paccept = %f\n",c->dmax,c->amax/M_PI,pnow);
 }
 
-double totalEnergy(Colloid *carray, double *uext, double *uint){ //Give an Array here!
+double totalEnergy(Colloid *carray, double *uext, double *uint, Config *c){ //Give an Array here!
 	double utot = 0;
 	*uext = 0;
 	*uint = 0;
 	int collision = 0;
 	int i = 0;
 	for(i = 0;i < N; ++i){
-		carray[i].vext = extPotential(&carray[i],&collision);
+		carray[i].vext = extPotential(&carray[i],&collision,c->g);
 		carray[i].vint = pairPotential(&carray[i],&collision);
 		*uext += carray[i].vext;
 		*uint += carray[i].vint;
@@ -133,15 +133,15 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 
 		du = deltaU(&carray[i], &collision, c);
 
-		if( collision || !accept(du) ){
+		if( collision || !accept(du,c->T) ){
 			carray[i].x = oldx;
 			carray[i].z = oldz;
 			carray[i].a = olda;
 			reSortX(&carray[i]);
 			reSortZ(&carray[i]);
 		}else{
-			carray[i].vext = extPotential(&carray[i],&collision,c);
-			carray[i].vint = pairPotential(&carray[i],&collision,c);
+			carray[i].vext = extPotential(&carray[i],&collision,c->g);
+			carray[i].vint = pairPotential(&carray[i],&collision);
 			p += 1.0;
 		}
 		if ( stats ){
@@ -202,7 +202,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	return p/howmany;
 }
 
-int accept(double du){
+int accept(double du, double T){
 	if( du < 0 ) return 1;
 	else{
 		double paccept = exp(-du/T);
@@ -210,13 +210,13 @@ int accept(double du){
 	}
 }
 
-double deltaU(Colloid *c, int *collision){
+double deltaU(Colloid *colloid, int *collision, Config *c){
 	double du = 0;
 	int col = 0;
 	*collision = 0;
-	du = extPotential(c,&col) - (*c).vext;
+	du = extPotential(colloid,&col,c->g) - colloid->vext;
 	*collision += col;
-	du += pairPotential(c, &col) - (*c).vint;
+	du += pairPotential(colloid, &col) - colloid->vint;
 	*collision += col;
 	return du;
 }

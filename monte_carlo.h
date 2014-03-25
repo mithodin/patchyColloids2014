@@ -1,10 +1,8 @@
-#include <stdbool.h>
-
-double extPotential(Colloid *, int*);
+double extPotential(Colloid *, int*, double);
 double pairPotential(Colloid *, int*);
-double totalEnergy(Colloid *, double *, double *);
-double monteCarloStep(Colloid *, bool, Stats *);
-double monteCarloSteps(Colloid *, int, Stats *);
-double deltaU(Colloid*, int*);
-int accept(double);
-void initDmax(Colloid *);
+double totalEnergy(Colloid *, double *, double *, Config*);
+double monteCarloStep(Colloid *, Config*, Stats *);
+double monteCarloSteps(Colloid *, int, Config*, Stats *, FILE*);
+double deltaU(Colloid*, int*, Config*);
+int accept(double, double);
+void initDmax(Colloid*, Config*, FILE*);

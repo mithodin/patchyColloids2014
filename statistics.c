@@ -5,87 +5,80 @@
 #include "parameters.h"
 #include "statistics.h"
 
-char statFn[40];
-double *rho1;
-double *rho2;
-double *f1;
-double *f2;
-int bins;
+int binIndex(double,double,int);
+void norm(Stats *stat);
 
-int M1dens = 0, M2dens = 0;
-
-int binIndex(double);
-void norm(void);
-
-void initStats(int bin){
-	bins = bin;
-	rho1 = (double *)calloc(bins,sizeof(double));
-	rho2 = (double *)calloc(bins,sizeof(double));
-	f1 = (double *)calloc(bins,sizeof(double));
-	f2 = (double *)calloc(bins,sizeof(double));
-	M1dens = 0;
-	M2dens = 0;
+Stats *initStats(int bin){
+	Stats *stat = malloc(sizeof(Stats));
+	stat->bins = bin;
+	stat->rho1 = (double *)calloc(bins,sizeof(double));
+	stat->rho2 = (double *)calloc(bins,sizeof(double));
+	stat->f1 = (double *)calloc(bins,sizeof(double));
+	stat->f2 = (double *)calloc(bins,sizeof(double));
+	stat->M1 = 0;
+	stat->M2 = 0;
+	return stat;
 }
 
-void printStats(Colloid *carray){
+void printStats(Colloid *carray, double height, Stats *stat, char *statFn){
 	norm();
-	FILE *stats = fopen(statFn,"w");
-	if( stats ){
+	FILE *statFile = fopen(statFn,"w");
+	if( statFile ){
 		int i;
-		fprintf(stats,"#density profile\n#Position(middle of bin)\trho1\trho2\n");
-		for(i = 0; i < bins; ++i){
-			fprintf(stats,"%f\t%f\t%f\n",(i+0.5)/bins*height,rho1[i],rho2[i]);
+		fprintf(statFile,"#density profile\n#Position(middle of bin)\trho1\trho2\n");
+		for(i = 0; i < stat->bins; ++i){
+			fprintf(statFile,"%f\t%f\t%f\n",(i+0.5)/stat->bins*height,stat->rho1[i],stat->rho2[i]);
 		}
-		fprintf(stats,"\n\n");
+		fprintf(statFile,"\n\n");
 
-		fprintf(stats,"#bonds profile\n#Position(middle of bin)\tf1\tf2\n");
-		for(i = 0; i < bins; ++i){
-			fprintf(stats,"%f\t%f\t%f\n",(i+0.5)/bins*height,f1[i],f2[i]);
+		fprintf(statFile,"#bonds profile\n#Position(middle of bin)\tf1\tf2\n");
+		for(i = 0; i < stat->bins; ++i){
+			fprintf(statFile,"%f\t%f\t%f\n",(i+0.5)/stat->bins*height,stat->f1[i],stat->f2[i]);
 		}
 	}else{
-		printf("error writing stats - %s\n",statFn);
+		printf("error writing statFile - %s\n",statFn);
 	}
-	fclose(stats);
+	fclose(statFile);
 }
 
-void norm(void){
+void norm(Stats *stat){
 	int i;
-	for(i = 0;i<bins;++i){
-		if ( rho1[i] != 0 ) f1[i] /= 3.0*rho1[i];
-		if ( rho2[i] != 0 ) f2[i] /= 2.0*rho2[i];
-		rho1[i] /= M1dens;
-		rho2[i] /= M2dens;
+	for(i = 0;i<stat->bins;++i){
+		if ( stat->rho1[i] != 0 ) stat->f1[i] /= 3.0*stat->rho1[i];
+		if ( stat->rho2[i] != 0 ) stat->f2[i] /= 2.0*stat->rho2[i];
+		stat->rho1[i] /= stat->M1;
+		stat->rho2[i] /= stat->M2;
 	}
 }
 
-int binIndex(double z){
+int binIndex(double z, double height, int bins){
 	int i = (int)(z/height*bins);
 	i = i < bins ? i : bins-1;
 	return i;
 }
 
-void updateDensity(double z, species kind){
-	int i = binIndex(z);
+void updateDensity(double z, species kind, Config *c, Stats *stat){
+	int i = binIndex(z,c->height,stat->bins);
 	switch(kind){
 		case THREEPATCH:
-			rho1[i] += 1.0;
-			++M1dens;
+			stat->rho1[i] += 1.0;
+			++(stat->M1);
 			break;
 		case TWOPATCH:
-			rho2[i] += 1.0;
-			++M2dens;
+			stat->rho2[i] += 1.0;
+			++(stat->M2);
 			break;
 	}
 }
 
-void updateF(double z, double val, species kind){
-	int i = binIndex(z);
+void updateF(double z, double val, species kind, Config *c, Stats *stat){
+	int i = binIndex(z,c->height,stat->bins);
 	switch(kind){
 		case THREEPATCH:
-			f1[i] += val;
+			stat->f1[i] += val;
 			break;
 		case TWOPATCH:
-			f2[i] += val;
+			stat->f2[i] += val;
 			break;
 	}
 }
