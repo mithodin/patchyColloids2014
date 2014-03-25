@@ -12,11 +12,8 @@ const double paccept = 0.2;
 const double angularPaccept = 0.4;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
-double dmax = 1.0; //completely random numbers
-double amax = 0.1*2.0/3.0*M_PI;
 double simRate = 0; //mc steps per second.
 const int maxspan = 10;
-bool ineq = false;
 
 double avg(double *, int);
 
