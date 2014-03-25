@@ -16,6 +16,7 @@ int m2_length = 0;
 int g_length = 0;
 int comp_length = 0;
 double x;
+double lastT,lastM2,lastG,lastX,lastN;
 
 extern char fn[40];
 extern char statFn[40];
@@ -159,16 +160,16 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		iT = (loaded/m2_length)%t_length;
 		iG = (loaded/m2_length/t_length)%g_length;
 		iX = (loaded/m2_length/t_length/g_length)%comp_length;
-		T = temperature ? config_setting_get_float_elem(temperature, iT) : T;
-		M2 = mass2 ? config_setting_get_float_elem(mass2, iM2) : M2;
-		g = grav ? config_setting_get_float_elem(grav, iG) : g;
-		x = comp ? config_setting_get_float_elem(comp, iX) : x;
+		T = temperature ? config_setting_get_float_elem(temperature, iT) : lastT;
+		M2 = mass2 ? config_setting_get_float_elem(mass2, iM2) : lastM2;
+		g = grav ? config_setting_get_float_elem(grav, iG) : lastG;
+		x = comp ? config_setting_get_float_elem(comp, iX) : lastX;
 		if( x < 0 || x > 1 ){
 			printf("Invalid x value!\n");
 			return 0;
 		}
-		N1 = N*x;
-		N2 = N*(x-1);
+		N1 = lastN*x;
+		N2 = lastN*(x-1);
 		++loaded;
 	}
 	if( loaded ){
@@ -183,6 +184,14 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		(*c)->T = T;
 		(*c)->steps = steps;
 		(*c)->g = g;
+		(*c)->simRate = 0;
+		lastT = T;
+		lastM2 = M2;
+		lastG = g;
+		lastX = x;
+		lastN = N;
+		printf("Config %d loaded!\n",loaded);
+		return loaded;
 	}
 	return 0;
 }

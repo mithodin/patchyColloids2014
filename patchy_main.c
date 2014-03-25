@@ -99,24 +99,14 @@ int main(int argc, char** argv){
 		pthread_attr_setdetachstate(&at, PTHREAD_CREATE_JOINABLE);
 		int rc = pthread_create(&threads[realindex],&at,newThread,(void *)c);
 		if( rc ) printf("Error creating thread %d\n",realindex);
+		else printf("Thread %d started.\n",realindex);
 	}
-	pthread_exit(NULL);
+	int i;
+	maxThreads = maxThreads > index ? index : maxThreads;
+	for(i = 0;i<maxThreads;++i){
+		pthread_join(threads[i],(void *)&result);
+		if( result ) printf("Warning: Nonzero exit of thread %d\n",i);
+	}
 	printf("So long and thanks for all the fish...\n");
 	return 0;
 }
-
-/*
-void reset(void){
-	free(particles);
-	free(rho1);
-	free(rho2);
-	free(f1);
-	free(f2);
-	dmax = 1.0;
-	amax = 0.1*2.0/3.0*M_PI;
-	simRate = 0;
-	ineq = false;
-	M1dens = 0;
-	M2dens = 0;
-}
-*/

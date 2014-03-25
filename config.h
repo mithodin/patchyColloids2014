@@ -19,6 +19,8 @@ struct conf{
 	char out[40];
 	char statOut[40];
 	char posOut[40];
+
+	int simRate;
 };
 
 typedef struct conf Config;

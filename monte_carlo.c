@@ -14,7 +14,6 @@ const double paccept = 0.2;
 const double angularPaccept = 0.4;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
-double simRate = 0; //mc steps per second.
 const int maxspan = 10;
 
 double avg(double *, int);
@@ -158,8 +157,8 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	bool verbose = false;
 	double p=0;
 	int i = 0;
-	if(simRate != 0){
-		double sETA = ((double)howmany)/simRate;
+	if(c->simRate != 0){
+		double sETA = ((double)howmany)/c->simRate;
 		if(sETA > 10){ verbose = true; }
 		int hours = (int)floor(sETA/60.0/60.0);
 		sETA -= hours*60*60;
@@ -195,7 +194,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	gettimeofday(&stop,NULL);
 	if (verbose ) fprintf(out,"100%%]\n");
 	double secs = (stop.tv_sec - start.tv_sec) + (double)(stop.tv_usec - start.tv_usec)/10e6;
-	simRate=((double)howmany)/secs;
+	c->simRate=((double)howmany)/secs;
 	int hours = (int)floor(secs/60.0/60.0);
 	secs -= hours*60*60;
 	int minutes = (int)floor(secs/60.0);
