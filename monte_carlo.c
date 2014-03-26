@@ -16,6 +16,8 @@ const double paccept = 0.2;
 const double angularPaccept = 0.4;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
+const double defaultDmax = 1e-1;
+const double defaultAmax = 1e-1*2.0/3.0*M_PI;
 
 double avg(double *, int);
 
@@ -60,6 +62,8 @@ double pairPotential(Colloid *particle, int *collision, Config *c){
 }
 
 void initDmax(Colloid *carray, Config *c){
+	c->dmax = defaultDmax;
+	c->amax = defaultAmax;
 	FILE *out = fopen(c->out,"a+");
 	double d = c->dmax; //just storing this for later reference
 	double u[maxspan] = {0};
