@@ -20,21 +20,11 @@ number = system("ls positions*png 2> /dev/null | wc -l | bc")
 set terminal pngcairo size 2400,2000 enhanced color font "CMU Sans Serif,28" lw 3
 set output prefix."positions".number.".png"
 
-set object 1 rect from 0,0 to width,height fillstyle empty border lc rgb "gray" lw 3
+set object 1 rect from 0,0 to width,height fillstyle empty border lc rgb "gray" lw 2.5
 
 plot datafile u 1:2:(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
      datafile u ($1+cos($3)/2):($2+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
      datafile u ($1+$4*cos($3+2.0/3.0*pi)/2):($2+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
      datafile u ($1+$4*cos($3+4.0/3.0*pi)/2):($2+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+(1-$4)*cos($3+pi)/2):($2+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width):2:(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1-width+cos($3)/2):($2+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1-width+$4*cos($3+2.0/3.0*pi)/2):($2+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width+$4*cos($3+4.0/3.0*pi)/2):($2+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1-width+(1-$4)*cos($3+pi)/2):($2+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width):2:(coldiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+width+cos($3)/2):($2+sin($3)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle, \
-     datafile u ($1+width+$4*cos($3+2.0/3.0*pi)/2):($2+$4*sin($3+2.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+$4*cos($3+4.0/3.0*pi)/2):($2+$4*sin($3+4.0/3.0*pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder notitle,\
-     datafile u ($1+width+(1-$4)*cos($3+pi)/2):($2+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder \
+     datafile u ($1+(1-$4)*cos($3+pi)/2):($2+(1-$4)*sin($3+pi)/2):(patchdiameter/2.0):($4*2+1) with circles lc variable fs solid noborder\
      	title params

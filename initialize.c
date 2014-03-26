@@ -14,7 +14,6 @@ extern FILE *initFile;
 
 void initParticles(Colloid *particles, Config *c){
 	initRandomly(particles, c);
-	makePeriodicX(particles);
 	c->Utot = totalEnergy(particles, c);
 }
 
@@ -33,7 +32,6 @@ void initRandomly(Colloid *particles, Config *c){
 				newColloid(TWOPATCH,this);
 			}
 			if(i>0){
-				insertSortedX(&particles[i-1], this);
 				insertSortedZ(&particles[i-1], this);
 			}
 			i+=1;
@@ -51,7 +49,7 @@ int noCollision(int i, Colloid *particles, Config *c){
 	for(j=0;j<i;j++){
 		xj = particles[j].x;
 		zj = particles[j].z;
-		if(distance(x,z,xj,zj,c) < 1.0) return 0;
+		if(distance(x,z,xj,zj) < 1.0) return 0;
 	}
 	return 1;
 }

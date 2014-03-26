@@ -23,24 +23,24 @@ double avg(double *, int);
 
 double extPotential(Colloid *colloid, int *collision, Config *c){
 	*collision = 0;
-	if( colloid->z < 0.5 || colloid->z > c->height-0.5 ){
+	if( colloid->z < 0.5 || colloid->z > c->height-0.5 || colloid->x < 0.5 || colloid->x > c->width-0.5 ){
 		*collision = 1;
 		return 0; //invalid
 	}
 	return colloid->z*(colloid->sp == THREEPATCH ? M1 : c->M2)*c->g;
 }
 
-double pairPotential(Colloid *particle, int *collision, Config *c){
+double pairPotential(Colloid *particle, int *collision){
 	Colloid *partner = particle;
 	double x = (*particle).x;
 	double z = (*particle).z;
 	double u = 0;
 	int col = 0;
 	*collision = 0;
-	while( fabs(realDx(x - (*(*partner).left).x, c->width)) <= sigma+delta ){
-		partner = (*partner).left;
-		if( fabs(z - (*partner).z) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col,c);
+	while( partner->below && z - partner->below->z <= sigma+delta ){
+		partner = partner->below;
+		if( fabs(x - partner->x) <= sigma+delta ){
+			u += pairInteraction(particle,partner,&col);
 			if(col){
 			 	*collision = 1;
 				return 0; //We are in an invalid state!
@@ -48,10 +48,10 @@ double pairPotential(Colloid *particle, int *collision, Config *c){
 		}
 	}
 	partner = particle;
-	while( fabs(realDx(x - (*(*partner).right).x, c->width)) <= sigma+delta ){
-		partner = (*partner).right;
-		if( fabs(z - (*partner).z) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col,c);
+	while( partner->above && partner->above->z - z <= sigma+delta ){
+		partner = partner->above;
+		if( fabs(x - partner->x) <= sigma+delta ){
+			u += pairInteraction(particle,partner,&col);
 			if(col){
 				*collision = 1;
 				return 0; //We are in an invalid state!
@@ -118,7 +118,7 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	int i = 0;
 	for(i = 0;i < c->N; ++i){
 		carray[i].vext = extPotential(&carray[i],&collision,c);
-		carray[i].vint = pairPotential(&carray[i],&collision,c);
+		carray[i].vint = pairPotential(&carray[i],&collision);
 		c->Uext += carray[i].vext;
 		c->Uint += carray[i].vint;
 	}
@@ -138,11 +138,10 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 		oldz = carray[i].z;
 		olda = carray[i].a;
 
-		carray[i].z = realZ(carray[i].z+c->dmax*(genrand_real1()*2.0-1.0),c->height);
-		carray[i].x = realZ(carray[i].x+c->dmax*(genrand_real1()*2.0-1.0),c->width);
+		carray[i].z = carray[i].z+c->dmax*(genrand_real1()*2.0-1.0);
+		carray[i].x = carray[i].x+c->dmax*(genrand_real1()*2.0-1.0);
 		carray[i].a = carray[i].a + (2.0*genrand_real2()-1.0)*(c->amax);
 
-		reSortX(&carray[i], c);
 		reSortZ(&carray[i], c);
 
 		du = deltaU(&carray[i], &collision, c);
@@ -151,11 +150,10 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			carray[i].x = oldx;
 			carray[i].z = oldz;
 			carray[i].a = olda;
-			reSortX(&carray[i],c);
 			reSortZ(&carray[i],c);
 		}else{
 			carray[i].vext = extPotential(&carray[i],&collision,c);
-			carray[i].vint = pairPotential(&carray[i],&collision,c);
+			carray[i].vint = pairPotential(&carray[i],&collision);
 			p += 1.0;
 		}
 		if ( stats ){
@@ -240,7 +238,7 @@ double deltaU(Colloid *colloid, int *collision, Config *c){
 	*collision = 0;
 	du = extPotential(colloid,&col,c) - colloid->vext;
 	*collision += col;
-	du += pairPotential(colloid, &col,c) - colloid->vint;
+	du += pairPotential(colloid, &col) - colloid->vint;
 	*collision += col;
 	return du;
 }

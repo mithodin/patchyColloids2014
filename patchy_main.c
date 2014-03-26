@@ -95,6 +95,7 @@ int main(int argc, char** argv){
 	for(i = 0;i<maxThreads;++i){
 		pthread_join(threads[i],(void *)result);
 		if( result ) printf("Warning: Nonzero exit of thread %d\n",i);
+		else printf("thread %d joined and exited normally.\n",i);
 	}
 	printf("So long and thanks for all the fish...\n");
 	return 0;

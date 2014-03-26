@@ -7,108 +7,11 @@
 #include "distance.h"
 
 void newColloid(species sp, Colloid *col){
-	(*col).left = NULL;
-	(*col).right = NULL;
 	(*col).above = NULL;
 	(*col).below = NULL;
 	(*col).vext = 0;
 	(*col).vint = 0;
 	(*col).sp = sp;
-}
-
-//For x direction
-void insertSortedX(Colloid *list, Colloid *newitem){ //DO NOT USE WHEN DLL HAS BEEN MADE PERIODIC!
-	while( (*list).left && (*(*list).left).x > (*newitem).x ){
-		list=(*list).left;
-	}
-	while( (*list).right && (*(*list).right).x < (*newitem).x ){
-		list=(*list).right;
-	}
-	if( (*list).x > (*newitem).x ){
-		insertLeft(list, newitem);
-	}else{
-		insertRight(list, newitem);
-	}
-}
-
-void insertRight(Colloid *list, Colloid *newitem){
-	Colloid *tmp = (*list).right;
-	(*list).right = newitem;
-	(*newitem).left = list;
-	(*newitem).right = tmp;
-	if( tmp ){ //If tmp is not a NULL pointer
-		(*tmp).left = newitem;
-	}
-}
-
-void insertLeft(Colloid *list, Colloid *newitem){
-	Colloid *tmp = (*list).left;
-	(*list).left = newitem;
-	(*newitem).right = list;
-	(*newitem).left = tmp;
-	if( tmp ){
-		(*tmp).right = newitem;
-	}
-}
-
-void printColloidsSortedX(Colloid *list){
-	printf("Colloids sorted by x coordinate:\n");
-	while( (*list).left && (*(*list).left).x < (*list).x ){
-		list = (*list).left;
-	}
-	do {
-		if( (*list).sp == THREEPATCH ){
-			printf("(%f) ",(*list).x);
-		}else{
-			printf("[%f] ",(*list).x);
-		}
-		list = (*list).right;
-	}while( list && (*(*list).left).x < (*list).x );
-	printf("\n");
-}
-
-void makePeriodicX(Colloid *list){
-	Colloid *first=list;
-	Colloid *last=list;
-	while( (*first).left ){
-		first = (*first).left;
-	}
-	while( (*last).right ){
-		last = (*last).right;
-	}
-	(*first).left = last;
-	(*last).right = first;
-}
-
-void reSortX(Colloid *list, Config *c){ //Point to the changed element!
-	while( realDx( (*list).x - (*(*list).right).x, c->width ) > 0 ){
-		swapRight(list);
-	}
-	while( realDx( (*list).x - (*(*list).left).x, c->width ) < 0 ){
-		swapLeft(list);
-	}
-}
-
-void swapRight(Colloid *list){
-	Colloid *curRight = (*list).right;
-	Colloid *curLeft = (*list).left;
-	(*list).right = (*curRight).right;
-	(*list).left = curRight;
-	(*curLeft).right = curRight;
-	(*(*curRight).right).left = list;
-	(*curRight).left = curLeft;
-	(*curRight).right = list;
-}
-
-void swapLeft(Colloid *list){
-	Colloid *curRight = (*list).right;
-	Colloid *curLeft = (*list).left;
-	(*list).left = (*curLeft).left;
-	(*list).right = curLeft;
-	(*(*curLeft).left).right = list;
-	(*curRight).left = curLeft;
-	(*curLeft).right = curRight;
-	(*curLeft).left = list;
 }
 
 //For z direction
@@ -193,8 +96,8 @@ void swapDown(Colloid *list){
 	(*curBelow).below = list;
 }
 
-double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Config *c){
-	double d = colloidDistance(c1,c2,c);
+double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
+	double d = colloidDistance(c1,c2);
 	*collision = 0;
 	if(d > sigma+delta){ return 0.0; }
 	else if(d < sigma ){ 
@@ -211,7 +114,7 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Config *c){
 				double p2X = patchPositionX(c2,j);
 				double p2Z = patchPositionZ(c2,j);
 				
-				d = distance(p1X,p1Z,p2X,p2Z,c);
+				d = distance(p1X,p1Z,p2X,p2Z);
 				if( d <= delta ){
 					return -U0;
 				}
@@ -221,8 +124,8 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Config *c){
 	}
 }
 
-double colloidDistance(Colloid *c1, Colloid *c2, Config *c){
-	return distance((*c1).x,(*c1).z,(*c2).x,(*c2).z,c);
+double colloidDistance(Colloid *c1, Colloid *c2){
+	return distance((*c1).x,(*c1).z,(*c2).x,(*c2).z);
 }
 
 double patchPositionX(Colloid *c, int which){
@@ -257,7 +160,7 @@ int collisions(Colloid *carray, Config *c){
 	int i=0,j=0;
 	for(i = 0; i<c->N; ++i){
 		for(j = i+1; j < c->N; j++){
-			if(colloidDistance(&carray[i], &carray[j],c) < sigma ){
+			if(colloidDistance(&carray[i], &carray[j]) < sigma ){
 				return 1;
 			}
 		}
