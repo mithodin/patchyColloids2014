@@ -30,7 +30,7 @@ void *newThread(void *params){
 	fflush(out);
 	fclose(out);
 
-	Stats *stat = initStats(c->height);
+	Stats *stat = initStats(c->height/2);
 	initDmax(particles,c);
 	
 	out = fopen(c->out,"a");

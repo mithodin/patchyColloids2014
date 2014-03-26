@@ -11,10 +11,12 @@ config_setting_t *temperature;
 config_setting_t *mass2;
 config_setting_t *grav;
 config_setting_t *comp; //Composition
+config_setting_t *num;
 int t_length = 0;
 int m2_length = 0;
 int g_length = 0;
 int comp_length = 0;
+int num_length = 0;
 double x;
 double lastT,lastM2,lastG,lastX,lastWidth,lastHeight;
 int lastN,lastSteps;
@@ -38,11 +40,20 @@ config_t *getParams(void){ //loads the params from a file
 }
 
 int loadParams(Config **c){ //We are relying on the fact that params is a valid config_t pointer
-	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0;
+	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0,iN=0;
 	double T,x,M2,g,height,width;
 	*c=(Config *)malloc(sizeof(Config));
 	if(!loaded){
-		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE) N = -1;
+		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE){
+			num = config_lookup(parameters,"N");
+			if(num == NULL ){
+				num_length = 1;
+				N = -1;
+			}else{
+				N = config_setting_get_int_elem(num, loaded);
+				num_length = config_setting_length(num);
+			}
+		}else{ num_length = 1; }
 		if(config_lookup_int(parameters,"N1",&N1) == CONFIG_FALSE) N1 = -1;
 		if(config_lookup_int(parameters,"N2",&N2) == CONFIG_FALSE) N2 = -1;
 		if(config_lookup_float(parameters,"x",&x) == CONFIG_FALSE){
@@ -146,31 +157,32 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 			}
 		}else{ t_length = 1; }
 		loaded = 1;
-	}else if(loaded < t_length * m2_length * g_length * comp_length){
+	}else if(loaded < t_length * m2_length * g_length * comp_length * num_length){
 		iM2 = loaded%m2_length;
 		iT = (loaded/m2_length)%t_length;
 		iG = (loaded/m2_length/t_length)%g_length;
 		iX = (loaded/m2_length/t_length/g_length)%comp_length;
+		iN = (loaded/m2_length/t_length/g_length/comp_length)%num_length;
 		T = temperature ? config_setting_get_float_elem(temperature, iT) : lastT;
 		M2 = mass2 ? config_setting_get_float_elem(mass2, iM2) : lastM2;
 		g = grav ? config_setting_get_float_elem(grav, iG) : lastG;
 		x = comp ? config_setting_get_float_elem(comp, iX) : lastX;
+		N = comp ? config_setting_get_int_elem(num, iN) : lastN;
 		if( x < 0 || x > 1 ){
 			printf("Invalid x value!\n");
 			return 0;
 		}
-		N1 = lastN*x;
-		N2 = lastN*(x-1);
+		N1 = N*x;
+		N2 = N*(x-1);
 		width = lastWidth;
 		height = lastHeight;
-		N = lastN;
 		steps = lastSteps;
 		++loaded;
 	}else{
 		return 0;
 	}
-	sprintf((*c)->posOut,"positions-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
-	sprintf((*c)->statOut,"statistics-T%d-M%d-G%d-X%d.dat",iT,iM2,iG,iX);
+	sprintf((*c)->posOut,"positions-T%d-M%d-G%d-X%d-N%d.dat",iT,iM2,iG,iX,iN);
+	sprintf((*c)->statOut,"statistics-T%d-M%d-G%d-X%d-N%d.dat",iT,iM2,iG,iX,iN);
 	(*c)->N = N;
 	(*c)->N1 = N1;
 	(*c)->N2 = N2;
