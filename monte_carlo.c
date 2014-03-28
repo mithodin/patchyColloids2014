@@ -140,7 +140,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 
 		carray[i].z = carray[i].z+c->dmax*(genrand_real1()*2.0-1.0);
 		carray[i].x = carray[i].x+c->dmax*(genrand_real1()*2.0-1.0);
-		carray[i].a = carray[i].a + (2.0*genrand_real2()-1.0)*(c->amax);
+		carray[i].a = fmod(carray[i].a + (2.0*genrand_real2()-1.0)*(c->amax), 2.0*M_PI);
 
 		reSortZ(&carray[i], c);
 
