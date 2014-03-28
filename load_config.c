@@ -73,7 +73,7 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		}
 		if(x != -1){
 			if(x < 0 || x > 1){
-				printf("1 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}
 			if(N1+N2 == -2){
@@ -81,7 +81,7 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 				N2 = N*(1-x);
 			}else if(N+N1 == -2){
 				if(x >= 1){
-					printf("2 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+					printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 					return 0;
 				}else{
 					N1 = (1.0/(1.0-x)-1.0)*N2;
@@ -92,30 +92,30 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		}
 		if(N == -1){
 			if(N1 < 0 || N2 < 0){
-				printf("3 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N = N1+N2;
 			}
 		}else if(N1 == -1){
 			if(N2 < 0 || N < N2){
-				printf("4 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N1 = N-N2;
 			}
 		}else if(N2 == -1){
 			if(N < N1){
-				printf("5 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N2 = N-N1;
 			}
 		}else if(N != N1+N2){
-			printf("x = %f, N=%d, N1=%d, N2=%d\n",x,N,N1,N2);
-			printf("6 Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+			printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 			return 0;
 		}
+		x = x == -1 ? 1.0*N1/(1.0*N) : x;
 		if(config_lookup_float(parameters,"M2",&M2) == CONFIG_FALSE){
 			mass2 = config_lookup(parameters,"M2");
 			if(mass2 == NULL){
@@ -202,5 +202,6 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 	lastWidth = width;
 	lastSteps = steps;
 	printf("Config %d loaded!\n",loaded);
+	printf("N = %d, N1 = %d, N2 = %d, x = %f, height = %f, width=%f, T = %f, steps = %1.0e\n",N,N1,N2,x,height,width,T,(double)steps);
 	return loaded;
 }

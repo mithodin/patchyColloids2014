@@ -28,7 +28,6 @@ Colloid *particles;	//holds all the particles
 const double M1 = 1;
 const double U0 = 1;
 const double delta = 0.11965683746373795115; //Patch diameter
-//const double delta = 0.2;
 const double sigma = 1.0; //Colloid diameter
 // END PARAMS
 
