@@ -167,13 +167,13 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		M2 = mass2 ? config_setting_get_float_elem(mass2, iM2) : lastM2;
 		g = grav ? config_setting_get_float_elem(grav, iG) : lastG;
 		x = comp ? config_setting_get_float_elem(comp, iX) : lastX;
-		N = comp ? config_setting_get_int_elem(num, iN) : lastN;
+		N = num ? config_setting_get_int_elem(num, iN) : lastN;
 		if( x < 0 || x > 1 ){
 			printf("Invalid x value!\n");
 			return 0;
 		}
 		N1 = N*x;
-		N2 = N*(x-1);
+		N2 = N*(1-x);
 		width = lastWidth;
 		height = lastHeight;
 		steps = lastSteps;
