@@ -30,7 +30,7 @@ void *newThread(void *params){
 	fflush(out);
 	fclose(out);
 
-	Stats *stat = initStats(c->height/2);
+	Stats *stat = initStats((int)(c->height/2.0));
 	initDmax(particles,c);
 	
 	out = fopen(c->out,"a");
@@ -53,6 +53,10 @@ void *newThread(void *params){
 	*(c->done) = 1;
 
 	free(particles);
+	free(stat->rho1);
+	free(stat->rho2);
+	free(stat->f1);
+	free(stat->f2);
 	free(stat);
 	fclose(out);
 	free(c);
