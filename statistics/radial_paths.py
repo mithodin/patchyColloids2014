@@ -52,14 +52,21 @@ for datei in argv[1:]:
 		colloids = append(colloids,p)
 	print ""
 	print "All particles added. Scanning..."
-	for idx,p1 in enumerate(colloids):
-		for p2 in colloids[(idx+1):]:
-			d = int(floor(((p1.x-p2.x)**2 + (p1.z-p2.z)**2)**0.5))
-			n[d] += 1
-			if has_path(gra,p1.n,p2.n):
-				bonds[d] += 1
-		stdout.write('.')
-		stdout.flush()
+	for sgra in connected_component_subgraphs(gra):
+		nd = nodes(sgra)
+		for n1 in nd:
+			c1 = colloids[n1]
+			for n2 in nd:
+				if n1 != n2:
+					c2 = colloids[n2]
+					d = ((c1.x - c2.x)**2 + (c1.z - c2.z)**2)**0.5
+					bonds[int(floor(d))] += 1
+			for c2 in colloids:
+				if c1.n != c2.n:
+					d = ((c1.x - c2.x)**2 + (c1.z - c2.z)**2)**0.5
+					n[int(floor(d))] += 1
+			stdout.write('.')
+			stdout.flush()
 	for i in range(maxd):
 		if n[i] != 0:
 			bonds[i] /= n[i]
