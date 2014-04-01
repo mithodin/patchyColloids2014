@@ -161,6 +161,9 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			updateF(carray[i].z,carray[i].vint/(-U0),carray[i].sp,c,stats);
 		}
 	}
+	if ( stats ){
+		++(stats->samplingCount);
+	}
 	return p/c->N;
 }
 
@@ -200,7 +203,6 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		for(k = 0; k < onePerc; ++k){
 			if ( j%100 == 0 ){
 				p+=monteCarloStep(carray,c,stats);
-				++(stats->samplingCount);
 			}else{
 				p+=monteCarloStep(carray,c,NULL);
 			}
