@@ -45,7 +45,7 @@ void *newThread(void *params){
 	fflush(out);
 
 	printPositions(particles, pacc,c);
-	printStats(particles, c->height, stat, c->statOut);
+	printStats(particles, stat, c);
 
 	if(collisions(particles,c)) fprintf(out,"Collision detected in final state!\n");
 	

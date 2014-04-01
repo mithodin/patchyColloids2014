@@ -200,6 +200,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		for(k = 0; k < onePerc; ++k){
 			if ( j%100 == 0 ){
 				p+=monteCarloStep(carray,c,stats);
+				++(stats->samplingCount);
 			}else{
 				p+=monteCarloStep(carray,c,NULL);
 			}

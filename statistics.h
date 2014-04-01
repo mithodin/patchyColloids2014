@@ -1,15 +1,15 @@
 struct stat{
-	double *rho1;
-	double *rho2;
-	double *f1;
-	double *f2;
+	long double *rho1;
+	long double *rho2;
+	long double *f1;
+	long double *f2;
 	int bins;
-	int M1,M2;
+	long samplingCount;
 };
 
 typedef struct stat Stats;
 
-void printStats(Colloid *, double, Stats*, char*);
+void printStats(Colloid *, Stats*, Config *);
 Stats *initStats(int);
 void updateDensity(double, species, Config*, Stats*);
 void updateF(double, double, species, Config*, Stats*);
