@@ -6,10 +6,6 @@ from networkx import *
 sigma = 1.0
 delta = 0.11965683746373795115
 maxd = int(ceil((100**2 + 200**2)**0.5))
-bonds = zeros(maxd)
-n = zeros(maxd)
-
-gra = empty_graph()
 
 class Particle:
 	def __init__(self,x,z,a,kind,name):
@@ -40,6 +36,9 @@ class Particle:
 
 for datei in argv[1:]:
 	data = genfromtxt(datei,comments="#",delimiter="\t")
+	bonds = zeros(maxd)
+	n = zeros(maxd)
+	gra = empty_graph()
 	colloids = array([])
 	for idx, partikel in enumerate(data):
 		p = Particle(partikel[0],partikel[1],partikel[2],partikel[3],idx)
