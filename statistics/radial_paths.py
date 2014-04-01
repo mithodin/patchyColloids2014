@@ -52,16 +52,15 @@ for datei in argv[1:]:
 		colloids = append(colloids,p)
 	print ""
 	print "All particles added. Scanning..."
-	for p1 in colloids:
-		for p2 in colloids:
-			if p1.n != p2.n:
-				d = int(floor(((p1.x-p2.x)**2 + (p1.z-p2.z)**2)**0.5))
-				n[d] += 1
-				if has_path(gra,p1.n,p2.n):
-					bonds[d] += 1
+	for idx,p1 in enumerate(colloids):
+		for p2 in colloids[(idx+1):]:
+			d = int(floor(((p1.x-p2.x)**2 + (p1.z-p2.z)**2)**0.5))
+			n[d] += 1
+			if has_path(gra,p1.n,p2.n):
+				bonds[d] += 1
 		stdout.write('.')
 		stdout.flush()
 	for i in range(maxd):
 		if n[i] != 0:
 			bonds[i] /= n[i]
-	savetxt("test.csv",bonds)
+	savetxt(datei.split(".")[0]+".csv",bonds)
