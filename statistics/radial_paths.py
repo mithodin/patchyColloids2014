@@ -44,6 +44,8 @@ for datei in argv[1:]:
 		p = Particle(partikel[0],partikel[1],partikel[2],partikel[3],idx)
 		gra.add_node(p.n)
 		for p2 in colloids:
+			d = ((p.x - p2.x)**2 + (p.z - p2.z)**2)**0.5
+			n[int(floor(d))] += 1
 			if p.bonded(p2):
 				gra.add_edge(p.n,p2.n)
 				stdout.write('.')
@@ -53,17 +55,13 @@ for datei in argv[1:]:
 	print "All particles added. Scanning..."
 	for sgra in connected_component_subgraphs(gra):
 		nd = nodes(sgra)
-		for n1 in nd:
+		for i,n1 in enumerate(nd):
 			c1 = colloids[n1]
-			for n2 in nd:
+			for n2 in nd[(i+1):]:
 				if n1 != n2:
 					c2 = colloids[n2]
 					d = ((c1.x - c2.x)**2 + (c1.z - c2.z)**2)**0.5
 					bonds[int(floor(d))] += 1
-			for c2 in colloids:
-				if c1.n != c2.n:
-					d = ((c1.x - c2.x)**2 + (c1.z - c2.z)**2)**0.5
-					n[int(floor(d))] += 1
 			stdout.write('.')
 			stdout.flush()
 	print ""
