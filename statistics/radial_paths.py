@@ -66,7 +66,9 @@ for datei in argv[1:]:
 					n[int(floor(d))] += 1
 			stdout.write('.')
 			stdout.flush()
+	print ""
 	for i in range(maxd):
 		if n[i] != 0:
 			bonds[i] /= n[i]
 	savetxt(datei.split(".")[0]+".csv",bonds)
+	print datei+" done"
