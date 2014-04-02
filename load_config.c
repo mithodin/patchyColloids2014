@@ -18,7 +18,7 @@ int g_length = 0;
 int comp_length = 0;
 int num_length = 0;
 double x;
-double lastT,lastM2,lastG,lastX,lastWidth,lastHeight;
+double lastT,lastM2,lastG,lastX,lastWidth,lastHeight,boxed;
 int lastN,lastSteps;
 
 
@@ -42,8 +42,21 @@ config_t *getParams(void){ //loads the params from a file
 int loadParams(Config **c){ //We are relying on the fact that params is a valid config_t pointer
 	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0,iN=0;
 	double T,x,M2,g,height,width;
+	const char **init=malloc(sizeof(char*));
 	*c=(Config *)malloc(sizeof(Config));
 	if(!loaded){
+		if(config_lookup_string(parameters,"init",init) == CONFIG_FALSE){
+			printf("Using random initalization\n");
+		}else{
+			if(strcmp(*init,"boxed") == 0){
+				if(config_lookup_float(parameters,"sep",&boxed) == CONFIG_FALSE){
+					printf("No valid value found for sep.\n");
+					return 0;
+				}
+			}else{
+				boxed=0;
+			}
+		}
 		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE){
 			num = config_lookup(parameters,"N");
 			if(num == NULL ){
@@ -193,6 +206,7 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 	(*c)->steps = steps;
 	(*c)->g = g;
 	(*c)->simRate = 0;
+	(*c)->boxed = boxed;
 	lastT = T;
 	lastM2 = M2;
 	lastG = g;

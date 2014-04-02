@@ -12,8 +12,15 @@
 
 extern FILE *initFile;
 
+void initRandomly(Colloid *, Config*);
+void initBoxed(Colloid *, Config*);
+
 void initParticles(Colloid *particles, Config *c){
-	initRandomly(particles, c);
+	if(c->boxed == 0){
+		initRandomly(particles, c);
+	}else{
+		initBoxed(particles,c);
+	}
 	c->Utot = totalEnergy(particles, c);
 }
 
@@ -31,6 +38,33 @@ void initRandomly(Colloid *particles, Config *c){
 			}else{
 				newColloid(TWOPATCH,this);
 			}
+			if(i>0){
+				insertSortedZ(&particles[i-1], this);
+			}
+			i+=1;
+		}
+	}
+}
+
+void initBoxed(Colloid *particles, Config *c){
+	int i=0;
+	Colloid *this=NULL;
+	double box = c->boxed > 0 ? c->boxed : 1+c->boxed;
+	double offset = c->boxed > 0 ? 0:fabs(c->boxed*c->height);
+	
+	species sp = THREEPATCH;
+	while(i<c->N){
+		if(i==c->N1){
+			sp = TWOPATCH;
+			offset = c->boxed < 0 ? 0:box*c->height;
+			box = 1-box;
+		}
+		particles[i].x = genrand_real2()*c->width;
+		particles[i].a = genrand_real2()*2.0*M_PI;
+		particles[i].z = genrand_real2()*(c->height*box-1 + offset)+0.5;
+		if(noCollision(i,particles,c)){
+			this = &particles[i];
+			newColloid(sp,this);
 			if(i>0){
 				insertSortedZ(&particles[i-1], this);
 			}

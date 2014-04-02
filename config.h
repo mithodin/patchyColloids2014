@@ -11,6 +11,7 @@ struct conf{
 	double g;
 	double dmax;
 	double amax;
+	double boxed;
 	
 	double Utot;
 	double Uint;
