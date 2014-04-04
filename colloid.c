@@ -13,6 +13,9 @@ void newColloid(species sp, Colloid *col){
 	col->vint = 0;
 	col->sp = sp;
 	col->partners = malloc(sizeof(Partners));
+	col->partners->partners[0] = NULL;
+	col->partners->partners[1] = NULL;
+	col->partners->partners[2] = NULL;
 }
 
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){

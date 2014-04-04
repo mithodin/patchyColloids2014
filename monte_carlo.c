@@ -133,7 +133,7 @@ void updateUint(Colloid *c, Partners *newp){
 	int i;
 	Colloid *c2;
 	for(i = 0; i < (c->sp == THREEPATCH?3:2); i++){
-		if (newp->partners[i] != c2 ){
+		if (newp->partners[i] != c->partners->partners[i] ){
 			if( newp->partners[i] == NULL ){
 				c2 = c->partners->partners[i];
 				breakBond(c,c2,i,c->partners->site[i]);
@@ -162,6 +162,9 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	int collision = 0;
 	int i=0;
 	for(i = 0; i < c->N; ++i){
+		newp.partners[0] = NULL;
+		newp.partners[1] = NULL;
+		newp.partners[2] = NULL;
 		oldx = carray[i].x;
 		oldz = carray[i].z;
 		olda = carray[i].a;
