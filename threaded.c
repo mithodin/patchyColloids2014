@@ -53,11 +53,11 @@ void *newThread(void *params){
 	*(c->done) = 1;
 
 	free(particles);
-/*	free(stat->rho1);
+	free(stat->rho1);
 	free(stat->rho2);
 	free(stat->f1);
 	free(stat->f2);
-	free(stat); */
+	free(stat);
 	fclose(out);
 	free(c);
 	pthread_exit((void *)0);

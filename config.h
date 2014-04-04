@@ -1,3 +1,5 @@
+#import <stdbool.h>
+
 struct conf{
 	volatile int *done;
 	int N;
@@ -20,6 +22,9 @@ struct conf{
 	char out[40];
 	char statOut[40];
 	char posOut[40];
+	char initIn[50];
+
+	bool loadInit;
 
 	int simRate;
 };

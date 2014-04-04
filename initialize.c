@@ -14,14 +14,52 @@ extern FILE *initFile;
 
 void initRandomly(Colloid *, Config*);
 void initBoxed(Colloid *, Config*);
+void initFromFile(Colloid *, Config *);
 
 void initParticles(Colloid *particles, Config *c){
-	if(c->boxed == 0){
+	if(c->loadInit){
+		initFromFile(particles, c);
+	}else if(c->boxed == 0){
 		initRandomly(particles, c);
 	}else{
 		initBoxed(particles,c);
 	}
 	c->Utot = totalEnergy(particles, c);
+}
+
+void initFromFile(Colloid *particles, Config *c){
+	FILE *in = fopen(c->initIn,"r");
+	if( !in ){
+		printf("Initialization file not found or unable to load!\n");
+		exit(1);
+	}else{
+		char discard[400];
+		fgets(discard,400,in);
+		fgets(discard,400,in);
+		//Discard first two lines.
+		int i,s;
+		for(i = 0;i<c->N;++i){
+			if(fscanf(in,"%lf %lf %lf %d",&(particles[i].x),&(particles[i].z),&(particles[i].a),&s) == 4){;
+				switch(s){
+					case 0:
+						newColloid(TWOPATCH,&particles[i]);
+						break;
+					case 1:
+						newColloid(THREEPATCH,&particles[i]);
+						break;
+					default:
+						printf("Error reading positions from file.\n");
+						exit(1);
+				}
+				if(i>0){
+					insertSortedZ(&particles[i-1], &particles[i]);
+				}
+			}else{
+				printf("Error reading positions from file!\n");
+				exit(1);
+			}
+		}
+	}
 }
 
 void initRandomly(Colloid *particles, Config *c){

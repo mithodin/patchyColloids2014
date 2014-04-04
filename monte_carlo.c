@@ -22,6 +22,8 @@ const double defaultAmax = 1e-1*2.0/3.0*M_PI;
 
 double avg(double *, int);
 void printMovie(char *, Colloid *, Config *);
+void printEnergy(char *, Config *, int);
+void updateUint(Colloid *, Partners *);
 
 double extPotential(Colloid *colloid, int *collision, Config *c){
 	*collision = 0;
@@ -208,8 +210,10 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	int i = 0;
 	char movieFile[60];
 	char energyFile[60];
-	if ( stats ) sprintf(movieFile,"movie-%s",c->posOut);
-	if ( stats ) sprintf(energyFile,"energy-%s",c->statOut);
+	if ( stats ){
+		sprintf(movieFile,"movie-%s",c->posOut);
+		sprintf(energyFile,"energy-%s",c->statOut);
+	}
 	if(c->simRate != 0){
 		double sETA = ((double)howmany)/c->simRate;
 		if( out && sETA > 10){ verbose = true; }
@@ -242,7 +246,10 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		for(k = 0; k < onePerc; ++k){
 			if ( j%100 == 0 ){
 				p+=monteCarloStep(carray,c,stats);
-				if ( stats && j%500 == 0 ) printMovie(movieFile,carray,c);
+				if ( stats && j%500 == 0 ){
+					printMovie(movieFile,carray,c);
+					printEnergy(energyFile,c,j);
+				}
 			}else{
 				p+=monteCarloStep(carray,c,NULL);
 			}
@@ -303,5 +310,11 @@ void printMovie(char *movieFile, Colloid *particles, Config *c){
 	for(i=0;i<c->N;++i){
 		fprintf(file,"%s\t%f\t%f\t0\n",particles[i].sp == THREEPATCH?"C":"N",particles[i].x,particles[i].z);
 	}
+	fclose(file);
+}
+
+void printEnergy(char *energyFile, Config *c, int step){
+	FILE *file = fopen(energyFile,"a");
+	fprintf(file,"%d\t%e\t%e\t%e\n",step,c->Utot,c->Uext,c->Uint);
 	fclose(file);
 }

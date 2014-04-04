@@ -20,6 +20,7 @@ int num_length = 0;
 double x;
 double lastT,lastM2,lastG,lastX,lastWidth,lastHeight,boxed;
 int lastN,lastSteps;
+const char **infile;
 
 
 config_t *getParams(void){ //loads the params from a file
@@ -43,6 +44,7 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0,iN=0;
 	double T,x,M2,g,height,width;
 	const char **init=malloc(sizeof(char*));
+	infile=malloc(sizeof(char*));
 	*c=(Config *)malloc(sizeof(Config));
 	if(!loaded){
 		if(config_lookup_string(parameters,"init",init) == CONFIG_FALSE){
@@ -53,8 +55,18 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 					printf("No valid value found for sep.\n");
 					return 0;
 				}
+				free(infile);
+				infile=NULL;
+			}else if(strcmp(*init,"file") == 0){
+				if(config_lookup_string(parameters,"initfile",infile) == CONFIG_FALSE){
+					printf("No valid filename given for initfile.\n");
+					return 0;
+				}
+				boxed=0;
 			}else{
 				boxed=0;
+				free(infile);
+				infile=NULL;
 			}
 		}
 		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE){
@@ -207,6 +219,12 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 	(*c)->g = g;
 	(*c)->simRate = 0;
 	(*c)->boxed = boxed;
+	if( infile == NULL ){
+		(*c)->loadInit = false;
+	}else{
+		strcpy((*c)->initIn,*infile);
+		(*c)->loadInit = true;
+	}
 	lastT = T;
 	lastM2 = M2;
 	lastG = g;
