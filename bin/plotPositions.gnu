@@ -17,7 +17,7 @@ set xlabel "x Coordinate"
 set ylabel "z Coordinate"
 
 number = system("ls positions*png 2> /dev/null | wc -l | bc")
-set terminal pngcairo size 2000,4000 enhanced color font "CMU Sans Serif,28" lw 3
+set terminal pngcairo size 3000,4000 enhanced color font "CMU Sans Serif,28" lw 3
 set output prefix."positions".number.".png"
 
 set object 1 rect from 0,0 to width,height fillstyle empty border lc rgb "gray" lw 2.5

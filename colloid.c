@@ -7,11 +7,24 @@
 #include "distance.h"
 
 void newColloid(species sp, Colloid *col){
-	(*col).above = NULL;
-	(*col).below = NULL;
-	(*col).vext = 0;
-	(*col).vint = 0;
-	(*col).sp = sp;
+	col->above = NULL;
+	col->below = NULL;
+	col->vext = 0;
+	col->vint = 0;
+	col->sp = sp;
+	col->partners = malloc(sizeof(Partners));
+}
+
+void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
+	c1->partners->partners[site1] = c2;
+	c1->partners->site[site1] = site2;
+	c2->partners->partners[site2] = c1;
+	c1->partners->site[site2] = site1;
+}
+
+void breakBond(Colloid *c1, Colloid *c2, int site1, int site2){
+	c1->partners->partners[site1] = NULL;
+	c2->partners->partners[site2] = NULL;
 }
 
 //For z direction
@@ -96,7 +109,7 @@ void swapDown(Colloid *list){
 	(*curBelow).below = list;
 }
 
-double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
+double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp){
 	double d = colloidDistance(c1,c2);
 	*collision = 0;
 	if(d > sigma+delta){ return 0.0; }
@@ -116,6 +129,8 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision){
 				
 				d = distance(p1X,p1Z,p2X,p2Z);
 				if( d <= delta ){
+					newp->partners[i]=c2;
+					newp->site[i]=j;
 					return -U0;
 				}
 			}

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/time.h>
+#include <string.h>
 #include "config.h"
 #include "colloid.h"
 #include "statistics.h"
@@ -20,6 +21,7 @@ const double defaultDmax = 1e-1;
 const double defaultAmax = 1e-1*2.0/3.0*M_PI;
 
 double avg(double *, int);
+void printMovie(char *, Colloid *, Config *);
 
 double extPotential(Colloid *colloid, int *collision, Config *c){
 	*collision = 0;
@@ -30,7 +32,7 @@ double extPotential(Colloid *colloid, int *collision, Config *c){
 	return colloid->z*(colloid->sp == THREEPATCH ? M1 : c->M2)*c->g;
 }
 
-double pairPotential(Colloid *particle, int *collision){
+double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	Colloid *partner = particle;
 	double x = (*particle).x;
 	double z = (*particle).z;
@@ -40,7 +42,7 @@ double pairPotential(Colloid *particle, int *collision){
 	while( partner->below && z - partner->below->z <= sigma+delta ){
 		partner = partner->below;
 		if( fabs(x - partner->x) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col);
+			u += pairInteraction(particle,partner,&col,newp);
 			if(col){
 			 	*collision = 1;
 				return 0; //We are in an invalid state!
@@ -51,7 +53,7 @@ double pairPotential(Colloid *particle, int *collision){
 	while( partner->above && partner->above->z - z <= sigma+delta ){
 		partner = partner->above;
 		if( fabs(x - partner->x) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col);
+			u += pairInteraction(particle,partner,&col,newp);
 			if(col){
 				*collision = 1;
 				return 0; //We are in an invalid state!
@@ -118,7 +120,7 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	int i = 0;
 	for(i = 0;i < c->N; ++i){
 		carray[i].vext = extPotential(&carray[i],&collision,c);
-		carray[i].vint = pairPotential(&carray[i],&collision);
+		carray[i].vint = pairPotential(&carray[i],&collision,carray[i].partners);
 		c->Uext += carray[i].vext;
 		c->Uint += carray[i].vint;
 	}
@@ -127,10 +129,36 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	return utot;
 }
 
+void updateUint(Colloid *c, Partners *newp){
+	int i;
+	Colloid *c2;
+	for(i = 0; i < (c->sp == THREEPATCH?3:2); i++){
+		if (newp->partners[i] != c2 ){
+			if( newp->partners[i] == NULL ){
+				c2 = c->partners->partners[i];
+				breakBond(c,c2,i,c->partners->site[i]);
+				c2->vint += U0;
+			}else if( c->partners->partners[i] == NULL ){
+				c2 = newp->partners[i];
+				newBond(c,c2,i,newp->site[i]);
+				c2->vint -= U0;
+			}else{ //Changed a bonding partner. This should not happen, I think
+				c2 = c->partners->partners[i];
+				breakBond(c,c2,i,c->partners->site[i]);
+				c2->vint += U0;
+				c2 = newp->partners[i];
+				newBond(c,c2,i,newp->site[i]);
+				c2->vint -= U0;
+			}
+		}
+	}
+}
+
 double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns acceptance rate
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
-	double du = 0;	
+	double du = 0, duint = 0, duext = 0;	
+	Partners newp;
 	int collision = 0;
 	int i=0;
 	for(i = 0; i < c->N; ++i){
@@ -144,7 +172,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 
 		reSortZ(&carray[i], c);
 
-		du = deltaU(&carray[i], &collision, c);
+		du = deltaU(&carray[i], &duint, &duext, &newp, &collision, c);
 
 		if( collision || !accept(du,c->T) ){
 			carray[i].x = oldx;
@@ -152,8 +180,12 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			carray[i].a = olda;
 			reSortZ(&carray[i],c);
 		}else{
-			carray[i].vext = extPotential(&carray[i],&collision,c);
-			carray[i].vint = pairPotential(&carray[i],&collision);
+			carray[i].vext += duext;
+			carray[i].vint += duint;
+			c->Utot += du;
+			c->Uint += duint;
+			c->Uext += duext;
+			updateUint(&carray[i],&newp);
 			p += 1.0;
 		}
 		if ( stats ){
@@ -171,6 +203,10 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	bool verbose = false;
 	double p=0;
 	int i = 0;
+	char movieFile[60];
+	char energyFile[60];
+	if ( stats ) sprintf(movieFile,"movie-%s",c->posOut);
+	if ( stats ) sprintf(energyFile,"energy-%s",c->statOut);
 	if(c->simRate != 0){
 		double sETA = ((double)howmany)/c->simRate;
 		if( out && sETA > 10){ verbose = true; }
@@ -203,6 +239,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		for(k = 0; k < onePerc; ++k){
 			if ( j%100 == 0 ){
 				p+=monteCarloStep(carray,c,stats);
+				if ( stats && j%500 == 0 ) printMovie(movieFile,carray,c);
 			}else{
 				p+=monteCarloStep(carray,c,NULL);
 			}
@@ -235,15 +272,14 @@ int accept(double du, double T){
 	}
 }
 
-double deltaU(Colloid *colloid, int *collision, Config *c){
-	double du = 0;
+double deltaU(Colloid *colloid, double *duint, double *duext, Partners *newp, int *collision, Config *c){
 	int col = 0;
 	*collision = 0;
-	du = extPotential(colloid,&col,c) - colloid->vext;
+	*duext = extPotential(colloid,&col,c) - colloid->vext;
 	*collision += col;
-	du += pairPotential(colloid, &col) - colloid->vint;
+	*duint = pairPotential(colloid, &col, newp) - colloid->vint;
 	*collision += col;
-	return du;
+	return *duint+*duext;
 }
 
 double avg(double *array, int index){
@@ -254,4 +290,15 @@ double avg(double *array, int index){
 		avg += array[i];
 	}
 	return avg/span;
+}
+
+void printMovie(char *movieFile, Colloid *particles, Config *c){
+	FILE *file = fopen(movieFile,"a");
+	fprintf(file,"%d\n",c->N);
+	fprintf(file,"frame\n");
+	int i;
+	for(i=0;i<c->N;++i){
+		fprintf(file,"%s\t%f\t%f\t0\n",particles[i].sp == THREEPATCH?"C":"N",particles[i].x,particles[i].z);
+	}
+	fclose(file);
 }

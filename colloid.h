@@ -1,5 +1,12 @@
 typedef enum {TWOPATCH,THREEPATCH} species;
 
+struct partners {
+	struct colloid *partners[3];
+	int site[3];
+};
+
+typedef struct partners Partners;
+
 struct colloid {
 	double x; //Coordinates
 	double z;
@@ -9,11 +16,14 @@ struct colloid {
 	species sp; //what species?
 	struct colloid *above; //and one in z-direction
 	struct colloid *below;
+	Partners *partners; //all bonding partners. 2 is always to be NULL for TWOPATCH
 };
 
 typedef struct colloid Colloid;
 
 void newColloid(species, Colloid *);
+void newBond(Colloid *, Colloid *, int, int);
+void breakBond(Colloid *, Colloid *, int, int);
 void insertSortedZ(Colloid *list, Colloid *newitem);
 void insertBelow(Colloid *list, Colloid *newitem);
 void insertAbove(Colloid *list, Colloid *newitem);
@@ -27,5 +37,5 @@ double colloidDistance(Colloid *, Colloid *);
 double patchPositionX(Colloid *, int);
 double patchPositionZ(Colloid *, int);
 int patches(Colloid *);
-double pairInteraction(Colloid *, Colloid *, int *);
+double pairInteraction(Colloid *, Colloid *, int *, Partners *);
 int collisions(Colloid *, Config *c);

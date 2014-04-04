@@ -25,6 +25,7 @@ void initParticles(Colloid *particles, Config *c){
 }
 
 void initRandomly(Colloid *particles, Config *c){
+	printf("Initalizing randomly\n");
 	int i=0;
 	Colloid *this = NULL;
 	while(i<c->N){
@@ -47,6 +48,7 @@ void initRandomly(Colloid *particles, Config *c){
 }
 
 void initBoxed(Colloid *particles, Config *c){
+	printf("Initalizing boxed\n");
 	int i=0;
 	Colloid *this=NULL;
 	double box = c->boxed > 0 ? c->boxed : 1+c->boxed;
@@ -61,7 +63,7 @@ void initBoxed(Colloid *particles, Config *c){
 		}
 		particles[i].x = genrand_real2()*c->width;
 		particles[i].a = genrand_real2()*2.0*M_PI;
-		particles[i].z = genrand_real2()*(c->height*box-1 + offset)+0.5;
+		particles[i].z = genrand_real2()*(c->height*box-1)+0.5+offset;
 		if(noCollision(i,particles,c)){
 			this = &particles[i];
 			newColloid(sp,this);

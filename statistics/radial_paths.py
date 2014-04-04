@@ -69,4 +69,5 @@ for datei in argv[1:]:
 		if n[i] != 0:
 			bonds[i] /= n[i]
 	savetxt(datei.split(".")[0]+".csv",bonds)
+	savetxt(datei.split(".")[0]+".n.csv",n)
 	print datei+" done"
