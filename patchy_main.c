@@ -57,7 +57,8 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	
-	int seed = (int)time(NULL);
+	//int seed = (int)time(NULL);
+	int seed = 5;
 	dsfmt_init_gen_rand(&randState, seed);
 
 	int index = 0;
