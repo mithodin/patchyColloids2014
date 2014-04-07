@@ -12,7 +12,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include "mt19937ar.h" 	//Generating random numbers
+#include "random.h" 	//Generating random numbers
 #include "config.h"
 #include "colloid.h" 	//What is a colloid?
 #include "statistics.h"
@@ -20,6 +20,7 @@
 #include "load_config.h" //Loading the configuration
 #include "monte_carlo.h"
 #include "threaded.h"
+#include "dSFMT/dSFMT.h"
 
 config_t *parameters;	//holds the parameters for our simulation
 Colloid *particles;	//holds all the particles
@@ -31,10 +32,15 @@ const double delta = 0.11965683746373795115; //Patch diameter
 const double sigma = 1.0; //Colloid diameter
 // END PARAMS
 
+pthread_mutex_t mtxRandom;
+dsfmt_t randState;
+
 int main(int argc, char** argv){
 	int maxThreads = 1;
 	pthread_t *threads;
 	volatile int *done;
+
+	pthread_mutex_init(&mtxRandom,NULL);
 
 	if ( argc == 2 ){
 		maxThreads = atoi(argv[1]);
@@ -51,9 +57,8 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	
-	long int seed=random_seed();
-	init_genrand((unsigned long)seed);
-
+	int seed = (int)time(NULL);
+	dsfmt_init_gen_rand(&randState, seed);
 
 	int index = 0;
 	int realindex = 0;

@@ -9,7 +9,7 @@
 #include "monte_carlo.h"
 #include "parameters.h"
 #include "distance.h"
-#include "mt19937ar.h"
+#include "random.h"
 
 #define maxspan 10
 
@@ -171,9 +171,11 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 		oldz = carray[i].z;
 		olda = carray[i].a;
 
-		carray[i].z = carray[i].z+c->dmax*(genrand_real1()*2.0-1.0);
-		carray[i].x = carray[i].x+c->dmax*(genrand_real1()*2.0-1.0);
-		carray[i].a = fmod(carray[i].a + (2.0*genrand_real2()-1.0)*(c->amax), 2.0*M_PI);
+		pthread_mutex_lock( &mtxRandom );
+		carray[i].z = carray[i].z+c->dmax*(dsfmt_genrand_open_close(&randState)*2.0-1.0);
+		carray[i].x = carray[i].x+c->dmax*(dsfmt_genrand_open_close(&randState)*2.0-1.0);
+		carray[i].a = fmod(carray[i].a + (2.0*dsfmt_genrand_open_open(&randState)-1.0)*(c->amax), 2.0*M_PI);
+		pthread_mutex_unlock( &mtxRandom );
 
 		reSortZ(&carray[i], c);
 
@@ -279,7 +281,10 @@ int accept(double du, double T){
 	if( du < 0 ) return 1;
 	else{
 		double paccept = exp(-du/T);
-		return paccept >= genrand_real1();
+		pthread_mutex_lock( &mtxRandom );
+		paccept -= dsfmt_genrand_close_open(&randState);
+		pthread_mutex_unlock( &mtxRandom );
+		return paccept >= 0;
 	}
 }
 

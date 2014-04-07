@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "config.h"
-#include "mt19937ar.h"
+#include "random.h"
 #include "parameters.h"
 #include "colloid.h"
 #include "distance.h"
@@ -63,13 +63,15 @@ void initFromFile(Colloid *particles, Config *c){
 }
 
 void initRandomly(Colloid *particles, Config *c){
-	printf("Initalizing randomly\n");
+	printf("Initalizing mtxRandomly\n");
 	int i=0;
 	Colloid *this = NULL;
 	while(i<c->N){
-		particles[i].x = genrand_real2()*c->width;
-		particles[i].z = genrand_real2()*(c->height-1)+0.5; //For not bumping into walls
-		particles[i].a = genrand_real2()*2*M_PI;
+		pthread_mutex_lock( &mtxRandom );
+		particles[i].x = dsfmt_genrand_close_open(&randState)*c->width;
+		particles[i].z = dsfmt_genrand_close_open(&randState)*(c->height-1)+0.5; //For not bumping into walls
+		particles[i].a = dsfmt_genrand_close_open(&randState)*2*M_PI;
+		pthread_mutex_unlock( &mtxRandom );
 		if(noCollision(i,particles,c)){
 			this = &particles[i];
 			if(i<c->N1){
@@ -99,9 +101,11 @@ void initBoxed(Colloid *particles, Config *c){
 			offset = c->boxed < 0 ? 0:box*c->height;
 			box = 1-box;
 		}
-		particles[i].x = genrand_real2()*c->width;
-		particles[i].a = genrand_real2()*2.0*M_PI;
-		particles[i].z = genrand_real2()*(c->height*box-1)+0.5+offset;
+		pthread_mutex_lock( &mtxRandom );
+		particles[i].x = dsfmt_genrand_close_open(&randState)*c->width;
+		particles[i].a = dsfmt_genrand_close_open(&randState)*2.0*M_PI;
+		particles[i].z = dsfmt_genrand_close_open(&randState)*(c->height*box-1)+0.5+offset;
+		pthread_mutex_unlock( &mtxRandom );
 		if(noCollision(i,particles,c)){
 			this = &particles[i];
 			newColloid(sp,this);

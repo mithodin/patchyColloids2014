@@ -56,11 +56,12 @@ void *newThread(void *params){
 	for(i=0;i<c->N;++i){
 		if( !particles[i].haveMoved ){
 			++notmoved;
+			fprintf(out,"%d, ",i);
 		}
 	}
 	fprintf(out,"%d particles have never moved.\n",notmoved);
 
-	printColloidsSortedZ(particles);
+	//printColloidsSortedZ(particles);
 
 	free(particles);
 	free(stat->rho1);
