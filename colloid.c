@@ -146,7 +146,7 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp)
 }
 
 double colloidDistance(Colloid *c1, Colloid *c2){
-	return distance((*c1).x,(*c1).z,(*c2).x,(*c2).z);
+	return distance(c1->x,c1->z,c2->x,c2->z);
 }
 
 double patchPositionX(Colloid *c, int which){

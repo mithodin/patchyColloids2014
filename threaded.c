@@ -52,16 +52,17 @@ void *newThread(void *params){
 	fprintf(out,"I'm done!\n");
 	*(c->done) = 1;
 
+	#ifdef PM_DEBUG
 	int i,notmoved=0;
 	for(i=0;i<c->N;++i){
 		if( !particles[i].haveMoved ){
 			++notmoved;
-			fprintf(out,"me: %ld above: %ld below: %ld\n",(long)&particles[i],(long)particles[i].above, (long)particles[i].below);
 		}
 	}
 	fprintf(out,"%d particles have never moved.\n",notmoved);
 
 	//printColloidsSortedZ(particles);
+	#endif
 
 	free(particles);
 	free(stat->rho1);

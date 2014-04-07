@@ -39,14 +39,12 @@ double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	double x = (*particle).x;
 	double z = (*particle).z;
 	double u = 0;
-	int col = 0;
 	*collision = 0;
 	while( partner->below && z - partner->below->z <= sigma+delta ){
 		partner = partner->below;
 		if( fabs(x - partner->x) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col,newp);
-			if(col){
-			 	*collision = 1;
+			u += pairInteraction(particle,partner,collision,newp);
+			if(*collision){
 				return 0; //We are in an invalid state!
 			}
 		}
@@ -55,9 +53,8 @@ double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	while( partner->above && partner->above->z - z <= sigma+delta ){
 		partner = partner->above;
 		if( fabs(x - partner->x) <= sigma+delta ){
-			u += pairInteraction(particle,partner,&col,newp);
-			if(col){
-				*collision = 1;
+			u += pairInteraction(particle,partner,collision,newp);
+			if(*collision){
 				return 0; //We are in an invalid state!
 			}
 		}
@@ -162,7 +159,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	double du = 0, duint = 0, duext = 0;	
 	Partners newp;
 	int collision = 0;
-	int i=0;
+	int i;
 	for(i = 0; i < c->N; ++i){
 		newp.partners[0] = NULL;
 		newp.partners[1] = NULL;
