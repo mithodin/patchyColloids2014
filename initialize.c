@@ -63,7 +63,7 @@ void initFromFile(Colloid *particles, Config *c){
 }
 
 void initRandomly(Colloid *particles, Config *c){
-	printf("Initalizing mtxRandomly\n");
+	printf("Initalizing randomly\n");
 	int i=0;
 	Colloid *this = NULL;
 	while(i<c->N){

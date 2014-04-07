@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 include_directories("/Users/ltref/Documents/bachelor_project/libraries/include")
 link_directories("/Users/ltref/Documents/bachelor_project/libraries/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin/")
-add_definitions(-DDSFMT_MEXP=19937)
+add_definitions(-DDSFMT_MEXP=19937 -DPM_DEBUG)
 add_executable(patchy_main dSFMT/dSFMT.c patchy_main.c load_config.c initialize.c distance.c colloid.c monte_carlo.c statistics.c threaded.c)
 target_link_libraries(patchy_main config m pthread)
 
