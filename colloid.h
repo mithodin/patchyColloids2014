@@ -1,3 +1,5 @@
+#import <stdbool.h>
+
 typedef enum {TWOPATCH,THREEPATCH} species;
 
 struct partners {
@@ -17,6 +19,7 @@ struct colloid {
 	struct colloid *above; //and one in z-direction
 	struct colloid *below;
 	Partners *partners; //all bonding partners. 2 is always to be NULL for TWOPATCH
+	bool haveMoved;
 };
 
 typedef struct colloid Colloid;

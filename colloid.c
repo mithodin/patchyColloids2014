@@ -16,6 +16,7 @@ void newColloid(species sp, Colloid *col){
 	col->partners->partners[0] = NULL;
 	col->partners->partners[1] = NULL;
 	col->partners->partners[2] = NULL;
+	col->haveMoved = false;
 }
 
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
@@ -32,13 +33,13 @@ void breakBond(Colloid *c1, Colloid *c2, int site1, int site2){
 
 //For z direction
 void insertSortedZ(Colloid *list, Colloid *newitem){ //DO NOT USE WHEN DLL HAS BEEN MADE PERIODIC!
-	while( (*list).below && (*(*list).below).z > (*newitem).z ){
-		list=(*list).below;
+	while( list->below && list->below->z > newitem->z ){
+		list=list->below;
 	}
-	while( (*list).above && (*(*list).above).z < (*newitem).z ){
-		list=(*list).above;
+	while( list->above && list->above->z < newitem->z ){
+		list=list->above;
 	}
-	if( (*list).z > (*newitem).z ){
+	if( list->z > newitem->z ){
 		insertBelow(list, newitem);
 	}else{
 		insertAbove(list, newitem);
@@ -46,39 +47,41 @@ void insertSortedZ(Colloid *list, Colloid *newitem){ //DO NOT USE WHEN DLL HAS B
 }
 
 void insertAbove(Colloid *list, Colloid *newitem){
-	Colloid *tmp = (*list).above;
-	(*list).above = newitem;
-	(*newitem).below = list;
-	(*newitem).above = tmp;
+	Colloid *tmp = list->above;
+	list->above = newitem;
+	newitem->below = list;
+	newitem->above = tmp;
 	if( tmp ){ //If tmp is not a NULL pointer
-		(*tmp).below = newitem;
+		tmp->below = newitem;
 	}
 }
 
 void insertBelow(Colloid *list, Colloid *newitem){
-	Colloid *tmp = (*list).below;
-	(*list).below = newitem;
-	(*newitem).above = list;
-	(*newitem).below = tmp;
+	Colloid *tmp = list->below;
+	list->below = newitem;
+	newitem->above = list;
+	newitem->below = tmp;
 	if( tmp ){
-		(*tmp).above = newitem;
+		tmp->above = newitem;
 	}
 }
 
 void printColloidsSortedZ(Colloid *list){
 	printf("Colloids sorted by z coordinate:\n");
-	while( (*list).below ){
-		list = (*list).below;
+	while( list->below ){
+		list = list->below;
 	}
+	int count = 0;
 	do {
-		if( (*list).sp == THREEPATCH ){
-			printf("(%f) ",(*list).z);
+		if( list->sp == THREEPATCH ){
+			printf("(%f) ",list->z);
 		}else{
-			printf("[%f] ",(*list).z);
+			printf("[%f] ",list->z);
 		}
-		list = (*list).above;
+		list = list->above;
+		++count;
 	}while( list );
-	printf("\n");
+	printf("\nTotal Number: %d\n",count);
 }
 
 void reSortZ(Colloid *list, Config *c){ //Point to the changed element!
@@ -90,18 +93,18 @@ void reSortZ(Colloid *list, Config *c){ //Point to the changed element!
 	}
 }
 
-void swapUp(Colloid *list){
-	Colloid *curAbove = (*list).above;
-	Colloid *curBelow = (*list).below;
-	(*list).above = (*curAbove).above;
-	(*list).below = curAbove;
-	if( curBelow ) (*curBelow).above = curAbove;
-	if( curAbove->above ) (*(*curAbove).above).below = list;
-	(*curAbove).below = curBelow;
-	(*curAbove).above = list;
+void swapUp(Colloid *list){ //assumes there is a particle above
+	Colloid *curAbove = list->above;
+	Colloid *curBelow = list->below;
+	list->above = curAbove->above;
+	list->below = curAbove;
+	if( curBelow ) curBelow->above = curAbove;
+	if( curAbove->above ) curAbove->above->below = list;
+	curAbove->below = curBelow;
+	curAbove->above = list;
 }
 
-void swapDown(Colloid *list){
+void swapDown(Colloid *list){ //assumes there is a particle below
 	Colloid *curAbove = (*list).above;
 	Colloid *curBelow = (*list).below;
 	(*list).below = (*curBelow).below;

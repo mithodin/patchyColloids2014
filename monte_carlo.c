@@ -191,6 +191,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			c->Uint += duint;
 			c->Uext += duext;
 			updateUint(&carray[i],&newp);
+			if ( stats && carray[i].z - oldz != 0 && carray[i].x - oldx != 0 ) carray[i].haveMoved = true;
 			p += 1.0;
 		}
 		if ( stats ){
