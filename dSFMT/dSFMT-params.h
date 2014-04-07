@@ -1,5 +1,3 @@
-#define DSFMT_MEXP 19937
-
 #ifndef DSFMT_PARAMS_H
 #define DSFMT_PARAMS_H
 
