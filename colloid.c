@@ -28,7 +28,7 @@ void clearPartners(Colloid *c){
 }
 
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
-	if(c1->partners->partners[site1] == c2 || c2->partners->partners[site2] == c1){
+	if(c1->partners->partners[site1] == c2 || c2->partners->partners[site2] == c1){
 		printf("%ld <--> %ld error. already bonded.\n",(long)c1,(long)c2);
 		exit(-1);
 	}
@@ -153,7 +153,7 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp)
 		int i = 0;
 		int j = 0;
 		for(i = 0; i < patches(c1); i++){
-			for( j = 0; j < patches(c2); j++ ){
+			for( j = 0; j < patches(c2); ++j ){
 				double p1X = patchPositionX(c1,i);
 				double p1Z = patchPositionZ(c1,i);
 				double p2X = patchPositionX(c2,j);
@@ -163,6 +163,7 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp)
 				if( d <= delta ){
 					newp->partners[i]=c2;
 					newp->site[i]=j;
+					printf("site2: %d\n",j);
 					return -U0;
 				}
 			}
@@ -198,10 +199,12 @@ double patchPositionZ(Colloid *c, int which){
 }
 
 int patches(Colloid *c){
-	switch( (*c).sp ){
+	switch( c->sp ){
 		case THREEPATCH: return 3; break;
 		case TWOPATCH: return 2; break;
-		default: return 0;
+		default:
+			printf("error\n");
+			exit(-1);
 	}
 }
 

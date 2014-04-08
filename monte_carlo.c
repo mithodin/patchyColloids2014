@@ -61,6 +61,7 @@ double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	}
 	int i;
 	for(i=0;i<3;++i){
+		if( newp->site[i]!=-1)
 		printf("index: %d, partner: %ld, site: %d\n",i,(long)newp->partners[i],newp->site[i]);
 	}
 	return u;
@@ -156,6 +157,8 @@ void updateUint(Colloid *c, Partners *newp){
 				newBond(c,c2,site1,site2);
 			}
 		}
+		printf(".\n");
+		fflush(stdout);
 	}
 }
 
