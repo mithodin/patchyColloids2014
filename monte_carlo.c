@@ -137,6 +137,7 @@ void updateUint(Colloid *c, Partners *newp){
 		site2 = newp->site[i];
 		site1 = i;
 		c2 = newp->partners[i];
+		printf("%d - %d\n",site1,site2);
 		if( c->partners->partners[site1] != c2 ){
 			if( c2 == NULL ){
 				oldp = c->partners->partners[site1];
