@@ -19,6 +19,14 @@ void newColloid(species sp, Colloid *col){
 	col->haveMoved = false;
 }
 
+void clearPartners(Colloid *c){
+	int i;
+	for(i=0;i<3;++i){
+		c->partners->partners[i]=NULL;
+		c->partners->site[i]=-1;
+	}
+}
+
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
 	c1->partners->partners[site1] = c2;
 	c1->partners->site[site1] = site2;

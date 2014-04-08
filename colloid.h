@@ -25,6 +25,7 @@ struct colloid {
 typedef struct colloid Colloid;
 
 void newColloid(species, Colloid *);
+void clearPartners(Colloid *);
 void newBond(Colloid *, Colloid *, int, int);
 void breakBond(Colloid *, Colloid *, int, int);
 void insertSortedZ(Colloid *list, Colloid *newitem);

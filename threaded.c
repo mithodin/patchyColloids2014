@@ -31,7 +31,12 @@ void *newThread(void *params){
 	fclose(out);
 
 	Stats *stat = initStats((int)(c->height/2.0));
+	#ifdef PM_DEBUG_NOINIT
+	c->dmax = 5e-2;
+	c->amax = 5e-1;
+	#else
 	initDmax(particles,c);
+	#endif
 	
 	out = fopen(c->out,"a");
 	fprintf(out,"Running simulation\n");
@@ -53,15 +58,6 @@ void *newThread(void *params){
 	*(c->done) = 1;
 
 	#ifdef PM_DEBUG
-	int i,notmoved=0;
-	for(i=0;i<c->N;++i){
-		if( !particles[i].haveMoved ){
-			++notmoved;
-		}
-	}
-	fprintf(out,"%d particles have never moved.\n",notmoved);
-
-	//printColloidsSortedZ(particles);
 	#endif
 
 	free(particles);

@@ -36,8 +36,8 @@ double extPotential(Colloid *colloid, int *collision, Config *c){
 
 double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	Colloid *partner = particle;
-	double x = (*particle).x;
-	double z = (*particle).z;
+	double x = particle->x;
+	double z = particle->z;
 	double u = 0;
 	*collision = 0;
 	while( partner->below && z - partner->below->z <= sigma+delta ){
@@ -119,6 +119,7 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	int i = 0;
 	for(i = 0;i < c->N; ++i){
 		carray[i].vext = extPotential(&carray[i],&collision,c);
+		clearPartners(&carray[i]);
 		carray[i].vint = pairPotential(&carray[i],&collision,carray[i].partners);
 		c->Uext += carray[i].vext;
 		c->Uint += carray[i].vint;
@@ -190,7 +191,9 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			c->Uint += duint;
 			c->Uext += duext;
 			updateUint(&carray[i],&newp);
-			if ( stats && carray[i].z - oldz != 0 && carray[i].x - oldx != 0 ) carray[i].haveMoved = true;
+#ifdef PM_DEBUG
+			if ( (carray[i].z - oldz != 0 && carray[i].x - oldx != 0) || carray[i].a - olda != 0 ) carray[i].haveMoved = true;
+#endif
 			p += 1.0;
 		}
 		if ( stats ){
@@ -201,7 +204,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	if ( stats ){
 		++(stats->samplingCount);
 	}
-	return p/c->N;
+	return p/(c->N);
 }
 
 double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FILE *out){ //return acceptance rate
@@ -271,6 +274,18 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		fprintf(out,"Time elapsed: %dh %dmin %fs\n",hours,minutes,secs);
 		fflush(out);
 	}
+#ifdef PM_DEBUG
+	if ( !out ){
+		out = stdout;
+	}
+	int notmoved = 0;
+	for(i=0;i<c->N;++i){
+		if( !carray[i].haveMoved ) ++notmoved;
+		carray[i].haveMoved = false;
+	}
+	fprintf(out,"%d particles have never been moved in %d rounds.\n",notmoved,howmany);
+	fflush(out);
+#endif
 	return p/howmany;
 }
 
@@ -286,12 +301,10 @@ int accept(double du, double T){
 }
 
 double deltaU(Colloid *colloid, double *duint, double *duext, Partners *newp, int *collision, Config *c){
-	int col = 0;
 	*collision = 0;
-	*duext = extPotential(colloid,&col,c) - colloid->vext;
-	*collision += col;
-	*duint = pairPotential(colloid, &col, newp) - colloid->vint;
-	*collision += col;
+	*duext = extPotential(colloid,collision,c) - colloid->vext;
+	if(*collision) return 0; //We will reject this move anyway
+	*duint = pairPotential(colloid,collision,newp) - colloid->vint;
 	return *duint+*duext;
 }
 
