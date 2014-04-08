@@ -59,6 +59,10 @@ double pairPotential(Colloid *particle, int *collision, Partners *newp){
 			}
 		}
 	}
+	int i;
+	for(i=0;i<3;++i){
+		printf("index: %d, partner: %ld, site: %d\n",i,(long)newp->partners[i],newp->site[i]);
+	}
 	return u;
 }
 
