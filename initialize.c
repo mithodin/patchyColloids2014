@@ -24,10 +24,13 @@ void initParticles(Colloid *particles, Config *c){
 	}else{
 		initBoxed(particles,c);
 	}
+	printf("calculating initial total energy\n");
 	c->Utot = totalEnergy(particles, c);
+	printf("initialization done\n");
 }
 
 void initFromFile(Colloid *particles, Config *c){
+	printf("Initalizing from file\n");
 	FILE *in = fopen(c->initIn,"r");
 	if( !in ){
 		printf("Initialization file not found or unable to load!\n");

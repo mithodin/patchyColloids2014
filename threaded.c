@@ -29,7 +29,6 @@ void *newThread(void *params){
 	fprintf(out,"Particles initialized!\n");
 	fflush(out);
 	fclose(out);
-
 	Stats *stat = initStats((int)(c->height/2.0));
 	#ifdef PM_DEBUG_NOINIT
 	c->dmax = 5e-2;

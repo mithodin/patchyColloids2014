@@ -131,24 +131,24 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 
 void updateUint(Colloid *c, Partners *newp){
 	int i;
-	Colloid *c2;
-	for(i = 0; i < (c->sp == THREEPATCH?3:2); i++){
-		if (newp->partners[i] != c->partners->partners[i] ){
-			if( newp->partners[i] == NULL ){
-				c2 = c->partners->partners[i];
-				breakBond(c,c2,i,c->partners->site[i]);
-				c2->vint += U0;
-			}else if( c->partners->partners[i] == NULL ){
-				c2 = newp->partners[i];
-				newBond(c,c2,i,newp->site[i]);
-				c2->vint -= U0;
-			}else{ //Changed a bonding partner. This should not happen, I think
-				c2 = c->partners->partners[i];
-				breakBond(c,c2,i,c->partners->site[i]);
-				c2->vint += U0;
-				c2 = newp->partners[i];
-				newBond(c,c2,i,newp->site[i]);
-				c2->vint -= U0;
+	int site2,site1,oldsite2;
+	Colloid *c2,*oldp;
+	for(i = 0; i < patches(c); ++i){
+		site2 = newp->site[i];
+		site1 = i;
+		c2 = newp->partners[i];
+		if( c->partners->partners[site1] != c2 ){
+			if( c2 == NULL ){
+				oldp = c->partners->partners[site1];
+				oldsite2 = c->partners->site[site1];
+				breakBond(c,oldp,site1,oldsite2);
+			}else if( c->partners->partners[site1] == NULL ){
+				newBond(c,c2,site1,site2);
+			}else{
+				oldp = c->partners->partners[site1];
+				oldsite2 = c->partners->site[site1];
+				breakBond(c,c->partners->partners[site1],site1,oldsite2);
+				newBond(c,c2,site1,site2);
 			}
 		}
 	}
@@ -162,9 +162,6 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	int collision = 0;
 	int i;
 	for(i = 0; i < c->N; ++i){
-		newp.partners[0] = NULL;
-		newp.partners[1] = NULL;
-		newp.partners[2] = NULL;
 		oldx = carray[i].x;
 		oldz = carray[i].z;
 		olda = carray[i].a;
@@ -186,7 +183,6 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			reSortZ(&carray[i],c);
 		}else{
 			carray[i].vext += duext;
-			carray[i].vint += duint;
 			c->Utot += du;
 			c->Uint += duint;
 			c->Uext += duext;
@@ -280,11 +276,14 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	}
 	int notmoved = 0;
 	for(i=0;i<c->N;++i){
-		if( !carray[i].haveMoved ) ++notmoved;
+		if( !carray[i].haveMoved ){
+			++notmoved;
+			printf("vint: %lf, vext: %lf\n",carray[i].vint,carray[i].vext);
+		}
 		carray[i].haveMoved = false;
 	}
-	fprintf(out,"%d particles have never been moved in %d rounds.\n",notmoved,howmany);
-	fflush(out);
+	printf("%d particles have never been moved in %d rounds.\n",notmoved,howmany);
+	fflush(stdout);
 #endif
 	return p/howmany;
 }

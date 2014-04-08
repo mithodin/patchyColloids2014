@@ -28,15 +28,27 @@ void clearPartners(Colloid *c){
 }
 
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
+	if(c1->partners->partners[site1] == c2 || c2->partners->partners[site2] == c1){
+		printf("%ld <--> %ld error. already bonded.\n",(long)c1,(long)c2);
+		exit(-1);
+	}
+	if(c1->partners->partners[site1] || c2->partners->partners[site2]){
+		printf("error. bond not clear!\n");
+		exit(-1);
+	}
 	c1->partners->partners[site1] = c2;
 	c1->partners->site[site1] = site2;
 	c2->partners->partners[site2] = c1;
 	c1->partners->site[site2] = site1;
+	c2->vint -= U0;
+	c1->vint -= U0;
 }
 
 void breakBond(Colloid *c1, Colloid *c2, int site1, int site2){
 	c1->partners->partners[site1] = NULL;
 	c2->partners->partners[site2] = NULL;
+	c2->vint += U0;
+	c1->vint += U0;
 }
 
 //For z direction
@@ -124,6 +136,12 @@ void swapDown(Colloid *list){ //assumes there is a particle below
 }
 
 double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp){
+	newp->partners[0]=NULL;
+	newp->partners[1]=NULL;
+	newp->partners[2]=NULL;
+	newp->site[0]=-1;
+	newp->site[1]=-1;
+	newp->site[2]=-1;
 	double d = colloidDistance(c1,c2);
 	*collision = 0;
 	if(d > sigma+delta){ return 0.0; }
@@ -163,7 +181,8 @@ double patchPositionX(Colloid *c, int which){
 	}else if( (*c).sp == TWOPATCH ){
 		return (*c).x + sigma/2.0*cos((*c).a + (which%2)*M_PI);
 	}else{
-		return -1; //ERROR!
+		printf("invalid patch position.\n");
+		exit(-1);
 	}
 }
 
@@ -173,7 +192,8 @@ double patchPositionZ(Colloid *c, int which){
 	}else if( (*c).sp == TWOPATCH ){
 		return (*c).z + sigma/2.0*sin((*c).a + (which%2)*M_PI);
 	}else{
-		return -1; //ERROR!
+		printf("invalid patch position.\n");
+		exit(-1);
 	}
 }
 
