@@ -145,7 +145,6 @@ void updateUint(Colloid *c, Partners *newp){
 }
 
 double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns acceptance rate
-	checkAllBonds(carray,c);
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0, duint = 0, duext = 0;	
@@ -191,7 +190,6 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	if ( stats ){
 		++(stats->samplingCount);
 	}
-	checkAllBonds(carray,c);
 	return p/(c->N);
 }
 
@@ -246,6 +244,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 			}
 			++j;
 		}
+		checkAllBonds(carray,c);
 	}
 	gettimeofday(&stop,NULL);
 	if (verbose ){

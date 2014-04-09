@@ -36,8 +36,6 @@ void checkAllBonds(Colloid *particles, Config *c){
 	for(i=0;i<c->N;++i){
 		checkBonds(&particles[i]);
 	}
-	/*printf(".");
-	fflush(stdout);*/
 }
 
 void clearPartners(Partners *p){
@@ -49,16 +47,8 @@ void clearPartners(Partners *p){
 }
 
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
-	if(c1->partners->partners[site1] == c2){
-		printf("%ld <--> %ld error (1). already bonded.\n",(long)c1,(long)c2);
-		exit(-1);
-	}
-	if(c2->partners->partners[site2] == c1){
-		printf("%ld <--> %ld error (2). already bonded.\n",(long)c1,(long)c2);
-		exit(-1);
-	}
 	if(c1->partners->partners[site1] || c2->partners->partners[site2]){
-		printf("error. bond not clear!\n");
+		printf("error. bond sites not clear!\n");
 		exit(-1);
 	}
 	c1->partners->partners[site1] = c2;
