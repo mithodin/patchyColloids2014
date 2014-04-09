@@ -132,21 +132,14 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 
 void updateUint(Colloid *c, Partners *newp){
 	int i;
-	int site2,site1;
-	Colloid *c2;
 	for(i = 0; i < patches(c); ++i){
-		site2 = newp->site[i];
-		site1 = i;
-		c2 = newp->partners[i];
-		if( c->partners->partners[site1] != c2 ){
-			if( c2 == NULL ){
-				breakBond(c,site1);
-			}else if( c->partners->partners[site1] == NULL ){
-				newBond(c,c2,site1,site2);
-			}else{
-				breakBond(c,site1);
-				newBond(c,c2,site1,site2);
-			}
+		if( c->partners->partners[i] != NULL ){
+			breakBond(c,i);
+		}
+	}
+	for(i = 0; i < patches(c); ++i){
+		if( newp->partners[i] != NULL ){
+			newBond(c,newp->partners[i],i,newp->site[i]);
 		}
 	}
 }

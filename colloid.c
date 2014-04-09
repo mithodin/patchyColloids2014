@@ -36,8 +36,8 @@ void checkAllBonds(Colloid *particles, Config *c){
 	for(i=0;i<c->N;++i){
 		checkBonds(&particles[i]);
 	}
-	printf(".");
-	fflush(stdout);
+	/*printf(".");
+	fflush(stdout);*/
 }
 
 void clearPartners(Partners *p){
@@ -73,13 +73,14 @@ void breakBond(Colloid *c1, int site1){
 	c1->partners->partners[site1]->partners->partners[c1->partners->site[site1]] = NULL;
 	c1->partners->partners[site1]->partners->site[c1->partners->site[site1]] = -1;
 	c1->partners->partners[site1]->vint += U0;
+
 	c1->partners->partners[site1] = NULL;
 	c1->partners->site[site1] = -1;
 	c1->vint += U0;
 }
 
 //For z direction
-void insertSortedZ(Colloid *list, Colloid *newitem){ //DO NOT USE WHEN DLL HAS BEEN MADE PERIODIC!
+void insertSortedZ(Colloid *list, Colloid *newitem){
 	while( list->below && list->below->z > newitem->z ){
 		list=list->below;
 	}
