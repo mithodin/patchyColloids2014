@@ -44,9 +44,9 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0,iN=0;
 	double T,x,M2,g,height,width;
 	const char **init=malloc(sizeof(char*));
-	infile=malloc(sizeof(char*));
 	*c=(Config *)malloc(sizeof(Config));
 	if(!loaded){
+		infile=malloc(sizeof(char*));
 		if(config_lookup_string(parameters,"init",init) == CONFIG_FALSE){
 			printf("Using random initalization\n");
 		}else{
