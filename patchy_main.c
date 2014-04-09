@@ -57,11 +57,11 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	
-	#ifdef PM_DEBUG
+#ifdef PM_DEBUG
 	int seed = 5;
-	#else
+#else
 	int seed = (int)time(NULL);
-	#endif
+#endif
 
 	dsfmt_init_gen_rand(&randState, seed);
 
