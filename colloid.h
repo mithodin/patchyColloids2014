@@ -24,10 +24,12 @@ struct colloid {
 
 typedef struct colloid Colloid;
 
+void checkBonds(Colloid *);
+void checkAllBonds(Colloid *, Config *);
 void newColloid(species, Colloid *);
-void clearPartners(Colloid *);
+void clearPartners(Partners *);
 void newBond(Colloid *, Colloid *, int, int);
-void breakBond(Colloid *, Colloid *, int, int);
+void breakBond(Colloid *, int);
 void insertSortedZ(Colloid *list, Colloid *newitem);
 void insertBelow(Colloid *list, Colloid *newitem);
 void insertAbove(Colloid *list, Colloid *newitem);

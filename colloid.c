@@ -19,17 +19,42 @@ void newColloid(species sp, Colloid *col){
 	col->haveMoved = false;
 }
 
-void clearPartners(Colloid *c){
+void checkBonds(Colloid *c){
+	int i;
+	for(i=0;i<patches(c);++i){
+		if(c->partners->partners[i]){
+			if(c->partners->partners[i]->partners->partners[c->partners->site[i]] != c){
+				printf("unreciprocated bond!\n");
+				exit(-1);
+			}
+		}
+	}
+}
+
+void checkAllBonds(Colloid *particles, Config *c){
+	int i;
+	for(i=0;i<c->N;++i){
+		checkBonds(&particles[i]);
+	}
+	printf(".");
+	fflush(stdout);
+}
+
+void clearPartners(Partners *p){
 	int i;
 	for(i=0;i<3;++i){
-		c->partners->partners[i]=NULL;
-		c->partners->site[i]=-1;
+		p->partners[i]=NULL;
+		p->site[i]=-1;
 	}
 }
 
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
-	if(c1->partners->partners[site1] == c2 || c2->partners->partners[site2] == c1){
-		printf("%ld <--> %ld error. already bonded.\n",(long)c1,(long)c2);
+	if(c1->partners->partners[site1] == c2){
+		printf("%ld <--> %ld error (1). already bonded.\n",(long)c1,(long)c2);
+		exit(-1);
+	}
+	if(c2->partners->partners[site2] == c1){
+		printf("%ld <--> %ld error (2). already bonded.\n",(long)c1,(long)c2);
 		exit(-1);
 	}
 	if(c1->partners->partners[site1] || c2->partners->partners[site2]){
@@ -39,15 +64,17 @@ void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
 	c1->partners->partners[site1] = c2;
 	c1->partners->site[site1] = site2;
 	c2->partners->partners[site2] = c1;
-	c1->partners->site[site2] = site1;
+	c2->partners->site[site2] = site1;
 	c2->vint -= U0;
 	c1->vint -= U0;
 }
 
-void breakBond(Colloid *c1, Colloid *c2, int site1, int site2){
+void breakBond(Colloid *c1, int site1){
+	c1->partners->partners[site1]->partners->partners[c1->partners->site[site1]] = NULL;
+	c1->partners->partners[site1]->partners->site[c1->partners->site[site1]] = -1;
+	c1->partners->partners[site1]->vint += U0;
 	c1->partners->partners[site1] = NULL;
-	c2->partners->partners[site2] = NULL;
-	c2->vint += U0;
+	c1->partners->site[site1] = -1;
 	c1->vint += U0;
 }
 
@@ -136,12 +163,6 @@ void swapDown(Colloid *list){ //assumes there is a particle below
 }
 
 double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp){
-	newp->partners[0]=NULL;
-	newp->partners[1]=NULL;
-	newp->partners[2]=NULL;
-	newp->site[0]=-1;
-	newp->site[1]=-1;
-	newp->site[2]=-1;
 	double d = colloidDistance(c1,c2);
 	*collision = 0;
 	if(d > sigma+delta){ return 0.0; }
@@ -163,7 +184,6 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp)
 				if( d <= delta ){
 					newp->partners[i]=c2;
 					newp->site[i]=j;
-					printf("site2: %d\n",j);
 					return -U0;
 				}
 			}

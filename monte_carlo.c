@@ -35,6 +35,7 @@ double extPotential(Colloid *colloid, int *collision, Config *c){
 }
 
 double pairPotential(Colloid *particle, int *collision, Partners *newp){
+	clearPartners(newp);
 	Colloid *partner = particle;
 	double x = particle->x;
 	double z = particle->z;
@@ -58,11 +59,6 @@ double pairPotential(Colloid *particle, int *collision, Partners *newp){
 				return 0; //We are in an invalid state!
 			}
 		}
-	}
-	int i;
-	for(i=0;i<3;++i){
-		if( newp->site[i]!=-1)
-		printf("index: %d, partner: %ld, site: %d\n",i,(long)newp->partners[i],newp->site[i]);
 	}
 	return u;
 }
@@ -124,11 +120,11 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	int i = 0;
 	for(i = 0;i < c->N; ++i){
 		carray[i].vext = extPotential(&carray[i],&collision,c);
-		clearPartners(&carray[i]);
 		carray[i].vint = pairPotential(&carray[i],&collision,carray[i].partners);
 		c->Uext += carray[i].vext;
 		c->Uint += carray[i].vint;
 	}
+	checkAllBonds(carray,c);
 	c->Uint /= 2.0;
 	utot = c->Uext + c->Uint;
 	return utot;
@@ -136,33 +132,27 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 
 void updateUint(Colloid *c, Partners *newp){
 	int i;
-	int site2,site1,oldsite2;
-	Colloid *c2,*oldp;
+	int site2,site1;
+	Colloid *c2;
 	for(i = 0; i < patches(c); ++i){
 		site2 = newp->site[i];
 		site1 = i;
 		c2 = newp->partners[i];
-		printf("%d - %d\n",site1,site2);
 		if( c->partners->partners[site1] != c2 ){
 			if( c2 == NULL ){
-				oldp = c->partners->partners[site1];
-				oldsite2 = c->partners->site[site1];
-				breakBond(c,oldp,site1,oldsite2);
+				breakBond(c,site1);
 			}else if( c->partners->partners[site1] == NULL ){
 				newBond(c,c2,site1,site2);
 			}else{
-				oldp = c->partners->partners[site1];
-				oldsite2 = c->partners->site[site1];
-				breakBond(c,c->partners->partners[site1],site1,oldsite2);
+				breakBond(c,site1);
 				newBond(c,c2,site1,site2);
 			}
 		}
-		printf(".\n");
-		fflush(stdout);
 	}
 }
 
 double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns acceptance rate
+	checkAllBonds(carray,c);
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
 	double du = 0, duint = 0, duext = 0;	
@@ -208,6 +198,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	if ( stats ){
 		++(stats->samplingCount);
 	}
+	checkAllBonds(carray,c);
 	return p/(c->N);
 }
 

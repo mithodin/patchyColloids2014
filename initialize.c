@@ -24,7 +24,6 @@ void initParticles(Colloid *particles, Config *c){
 	}else{
 		initBoxed(particles,c);
 	}
-	printf("calculating initial total energy\n");
 	c->Utot = totalEnergy(particles, c);
 	printf("initialization done\n");
 }
