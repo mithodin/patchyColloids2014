@@ -32,15 +32,10 @@ const double delta = 0.11965683746373795115; //Patch diameter
 const double sigma = 1.0; //Colloid diameter
 // END PARAMS
 
-pthread_mutex_t mtxRandom;
-dsfmt_t randState;
-
 int main(int argc, char** argv){
 	int maxThreads = 1;
 	pthread_t *threads;
 	volatile int *done;
-
-	pthread_mutex_init(&mtxRandom,NULL);
 
 	if ( argc == 2 ){
 		maxThreads = atoi(argv[1]);
@@ -57,14 +52,6 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	
-#ifdef PM_DEBUG
-	int seed = 5;
-#else
-	int seed = (int)time(NULL);
-#endif
-
-	dsfmt_init_gen_rand(&randState, seed);
-
 	int index = 0;
 	int realindex = 0;
 	long result = 0;

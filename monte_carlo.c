@@ -156,17 +156,15 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 		oldz = carray[i].z;
 		olda = carray[i].a;
 
-		pthread_mutex_lock( &mtxRandom );
-		carray[i].z = carray[i].z+c->dmax*(dsfmt_genrand_open_close(&randState)*2.0-1.0);
-		carray[i].x = carray[i].x+c->dmax*(dsfmt_genrand_open_close(&randState)*2.0-1.0);
-		carray[i].a = fmod(carray[i].a + (2.0*dsfmt_genrand_open_open(&randState)-1.0)*(c->amax), 2.0*M_PI);
-		pthread_mutex_unlock( &mtxRandom );
+		carray[i].z = carray[i].z+c->dmax*(dsfmt_genrand_open_close(&(c->myrand))*2.0-1.0);
+		carray[i].x = carray[i].x+c->dmax*(dsfmt_genrand_open_close(&(c->myrand))*2.0-1.0);
+		carray[i].a = fmod(carray[i].a + (2.0*dsfmt_genrand_open_open(&(c->myrand))-1.0)*(c->amax), 2.0*M_PI);
 
 		reSortZ(&carray[i], c);
 
 		du = deltaU(&carray[i], &duint, &duext, &newp, &collision, c);
 
-		if( collision || !accept(du,c->T) ){
+		if( collision || !accept(du,c) ){
 			carray[i].x = oldx;
 			carray[i].z = oldz;
 			carray[i].a = olda;
@@ -279,13 +277,11 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	return p/howmany;
 }
 
-int accept(double du, double T){
+int accept(double du, Config *c){
 	if( du < 0 ) return 1;
 	else{
-		double paccept = exp(-du/T);
-		pthread_mutex_lock( &mtxRandom );
-		paccept -= dsfmt_genrand_close_open(&randState);
-		pthread_mutex_unlock( &mtxRandom );
+		double paccept = exp(-du/c->T);
+		paccept -= dsfmt_genrand_close_open(&(c->myrand));
 		return paccept >= 0;
 	}
 }

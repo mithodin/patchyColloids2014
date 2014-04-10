@@ -69,11 +69,9 @@ void initRandomly(Colloid *particles, Config *c){
 	int i=0;
 	Colloid *this = NULL;
 	while(i<c->N){
-		pthread_mutex_lock( &mtxRandom );
-		particles[i].x = dsfmt_genrand_close_open(&randState)*c->width;
-		particles[i].z = dsfmt_genrand_close_open(&randState)*(c->height-1)+0.5; //For not bumping into walls
-		particles[i].a = dsfmt_genrand_close_open(&randState)*2*M_PI;
-		pthread_mutex_unlock( &mtxRandom );
+		particles[i].x = dsfmt_genrand_close_open(&(c->myrand))*c->width;
+		particles[i].z = dsfmt_genrand_close_open(&(c->myrand))*(c->height-1)+0.5; //For not bumping into walls
+		particles[i].a = dsfmt_genrand_close_open(&(c->myrand))*2*M_PI;
 		if(noCollision(i,particles,c)){
 			this = &particles[i];
 			if(i<c->N1){
@@ -103,11 +101,9 @@ void initBoxed(Colloid *particles, Config *c){
 			offset = c->boxed < 0 ? 0:box*c->height;
 			box = 1-box;
 		}
-		pthread_mutex_lock( &mtxRandom );
-		particles[i].x = dsfmt_genrand_close_open(&randState)*c->width;
-		particles[i].a = dsfmt_genrand_close_open(&randState)*2.0*M_PI;
-		particles[i].z = dsfmt_genrand_close_open(&randState)*(c->height*box-1)+0.5+offset;
-		pthread_mutex_unlock( &mtxRandom );
+		particles[i].x = dsfmt_genrand_close_open(&(c->myrand))*c->width;
+		particles[i].a = dsfmt_genrand_close_open(&(c->myrand))*2.0*M_PI;
+		particles[i].z = dsfmt_genrand_close_open(&(c->myrand))*(c->height*box-1)+0.5+offset;
 		if(noCollision(i,particles,c)){
 			this = &particles[i];
 			newColloid(sp,this);

@@ -1,4 +1,5 @@
 #import <stdbool.h>
+#import "dSFMT/dSFMT.h"
 
 struct conf{
 	volatile int *done;
@@ -27,6 +28,8 @@ struct conf{
 	bool loadInit;
 
 	int simRate;
+	
+	dsfmt_t myrand;
 };
 
 typedef struct conf Config;

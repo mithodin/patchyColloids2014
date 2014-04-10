@@ -1,18 +1,22 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "config.h"
 #include "colloid.h"
 #include "statistics.h"
 #include "parameters.h"
 #include "monte_carlo.h"
 #include "initialize.h"
+#include "random.h"
 
 void printPositions(Colloid *, double, Config *);
+int getRandomSeed(void);
 
 void *newThread(void *params){
 	printf("I'm alive!\n");
 	Config *c = (Config *)params;
+	dsfmt_init_gen_rand(&(c->myrand),getRandomSeed());
 	FILE *out = fopen(c->out,"w");
 	if( !out ){
 		printf("Error opening output file\n");
@@ -79,4 +83,21 @@ void printPositions(Colloid *particles, double paccept, Config *c){
 		fprintf(posFile,"%f\t%f\t%f\t%d\n",particles[i].x,particles[i].z,particles[i].a,particles[i].sp);
 	}
 	fclose(posFile);
+}
+
+int getRandomSeed(void){
+	FILE *rnd = fopen("/dev/random","r");
+	int seed;
+	if( rnd ){
+		if(fread(&seed,sizeof(int),1,rnd) != 1){
+			struct timeval t;
+			gettimeofday(&t,NULL);
+			seed=((int)t.tv_usec)^((int)t.tv_sec);
+		}
+	}else{
+		struct timeval t;
+		gettimeofday(&t,NULL);
+		seed=((int)t.tv_usec)^((int)t.tv_sec);
+	}
+	return seed;
 }
