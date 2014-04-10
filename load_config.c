@@ -1,3 +1,4 @@
+/** @file */
 #include <stdlib.h>
 #include <libconfig.h>
 #include <string.h>
@@ -5,24 +6,29 @@
 #include "load_config.h"
 #include "parameters.h"
 
-config_t *parameters;
-int loaded = 0;
-config_setting_t *temperature;
-config_setting_t *mass2;
-config_setting_t *grav;
-config_setting_t *comp; //Composition
-config_setting_t *num;
-int t_length = 0;
-int m2_length = 0;
-int g_length = 0;
-int comp_length = 0;
-int num_length = 0;
-double x;
-double lastT,lastM2,lastG,lastX,lastWidth,lastHeight,boxed;
-int lastN,lastSteps;
-const char **infile;
+config_t *parameters; /**< parameters struct (libconfig) */
+int loaded = 0; /**< count number of already loaded configurations */
+config_setting_t *temperature; /**< store array of temperatures */
+config_setting_t *mass2; /**< store array of masses for species 2 (twopatch) */
+config_setting_t *grav; /**< store array of gravitational constants */
+config_setting_t *comp; /**< store array of compositions \f$\frac{N_1}{N}\f$ */
+config_setting_t *num; /**< store array of total number of particles */
+int t_length = 0; /**< length of temperature */
+int m2_length = 0; /**< length of mass2 */
+int g_length = 0; /**< length of grav */
+int comp_length = 0; /**< lenght of comp */
+int num_length = 0; /**< length of num */
+double x; /**< store last composition */
+double lastT/** store static configurations */,lastM2/** store static configurations */,lastG/** store static configurations */,lastX/** store static configurations */,lastWidth/** store static configurations */,lastHeight/** store static configurations */,boxed; /**< store static configurations */
+int lastN/** store static configurations */,lastSteps; /**< store static configurations */
+const char **infile; /**< filename of initialization file */
 
 
+/**
+ * Initialize the parameters struct from parameters.cfg
+ * 
+ * @return the parameters struct or nothing (exit the program on failure)
+ */
 config_t *getParams(void){ //loads the params from a file
 	parameters=(struct config_t*)malloc(sizeof(struct config_t));
 
@@ -40,24 +46,29 @@ config_t *getParams(void){ //loads the params from a file
 	}
 }
 
+/**
+ * load one set of parameters (automagically traverses parameter space)
+ *
+ * @param c Pointer to Config Pointer. Will allocate memory there
+ * @return The index of the loaded configuration (starting at 1). 0 Indicates no more parameter sets available (because of error or all sets finished)
+ */
 int loadParams(Config **c){ //We are relying on the fact that params is a valid config_t pointer
-	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0,iN=0;
-	double T,x,M2,g,height,width;
-	const char **init=malloc(sizeof(char*));
-	*c=(Config *)malloc(sizeof(Config));
-	if(!loaded){
-		infile=malloc(sizeof(char*));
-		if(config_lookup_string(parameters,"init",init) == CONFIG_FALSE){
-			printf("Using random initalization\n");
+	int N,N1,N2,steps,iM2=0,iT=0,iG=0,iX=0,iN=0; //for intermediate storage
+	double T,x,M2,g,height,width; //for intermediate storage
+	const char **init=malloc(sizeof(char*)); //for reading string
+	*c=(Config *)malloc(sizeof(Config)); //allocate memory for the config struct
+	if(!loaded){ //The parameters have never been read
+		if(config_lookup_string(parameters,"init",init) == CONFIG_FALSE){ //try to read how to initialize
+			infile=NULL; //using random initialization
 		}else{
 			if(strcmp(*init,"boxed") == 0){
 				if(config_lookup_float(parameters,"sep",&boxed) == CONFIG_FALSE){
 					printf("No valid value found for sep.\n");
 					return 0;
 				}
-				free(infile);
-				infile=NULL;
+				infile=NULL; //assign NULL to indicate no initialization file
 			}else if(strcmp(*init,"file") == 0){
+				infile=malloc(sizeof(char*)); //allocate memory for the initialization file
 				if(config_lookup_string(parameters,"initfile",infile) == CONFIG_FALSE){
 					printf("No valid filename given for initfile.\n");
 					return 0;
@@ -65,15 +76,14 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 				boxed=0;
 			}else{
 				boxed=0;
-				free(infile);
-				infile=NULL;
+				infile=NULL; //assign NULL to indicate no initalization file
 			}
 		}
 		if(config_lookup_int(parameters,"N",&N) == CONFIG_FALSE){
 			num = config_lookup(parameters,"N");
 			if(num == NULL ){
 				num_length = 1;
-				N = -1;
+				N = -1; //-1 indicates no value found
 			}else{
 				N = config_setting_get_int_elem(num, loaded);
 				num_length = config_setting_length(num);
@@ -85,7 +95,7 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 			comp = config_lookup(parameters,"x");
 			if(comp == NULL){
 				comp_length = 1;
-				x = -1;
+				x = -1; //-1 indicates no value found
 			}else{
 				x = config_setting_get_float_elem(comp, loaded);
 				comp_length = config_setting_length(comp);

@@ -1,3 +1,5 @@
+/** @file */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -6,6 +8,12 @@
 #include "parameters.h"
 #include "distance.h"
 
+/**
+ * Initialize a new Colloid struct
+ *
+ * @param sp Define the species of the new colloid
+ * @param col Pointer to Colloid struct. Memory must be assigned beforehand!
+ */
 void newColloid(species sp, Colloid *col){
 	col->above = NULL;
 	col->below = NULL;
@@ -19,6 +27,13 @@ void newColloid(species sp, Colloid *col){
 	col->haveMoved = false;
 }
 
+/**
+ * Check if all bonds of the colloid are reciprocal
+ *
+ * Will exit the program with nonzero status if invalid bonds exist
+ *
+ * @param c Colloid to check
+ */
 void checkBonds(Colloid *c){
 	int i;
 	for(i=0;i<patches(c);++i){
@@ -31,6 +46,12 @@ void checkBonds(Colloid *c){
 	}
 }
 
+/**
+ * Check all bonds of a colloid array
+ *
+ * @param particles Colloid array
+ * @param c Configuration struct
+ */
 void checkAllBonds(Colloid *particles, Config *c){
 	int i;
 	for(i=0;i<c->N;++i){
@@ -38,6 +59,11 @@ void checkAllBonds(Colloid *particles, Config *c){
 	}
 }
 
+/**
+ * Set all bonds to NULL
+ *
+ * @param p Pointer to Partners struct. Pass colloid->partners here
+ */
 void clearPartners(Partners *p){
 	int i;
 	for(i=0;i<3;++i){
@@ -46,6 +72,17 @@ void clearPartners(Partners *p){
 	}
 }
 
+/**
+ * Creates a new bond between two colloids
+ *
+ * Will exit the program if one of the bonding sites is not clear
+ * Bonding site definitions are not being checked!
+ *
+ * @param c1 Colloid 1
+ * @param c2 Colloid 2
+ * @param site1 Bonding site for first colloid
+ * @param site2 Bonding site for second colloid
+ */
 void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
 	if(c1->partners->partners[site1] || c2->partners->partners[site2]){
 		printf("error. bond sites not clear!\n");
@@ -59,6 +96,12 @@ void newBond(Colloid *c1, Colloid *c2, int site1, int site2){
 	c1->vint -= U0;
 }
 
+/**
+ * Break an existing bond
+ *
+ * @param c1 One of the bonding partners
+ * @param site1 Bonding site on given colloid. Checks are not done that this is valid
+ */
 void breakBond(Colloid *c1, int site1){
 	c1->partners->partners[site1]->partners->partners[c1->partners->site[site1]] = NULL;
 	c1->partners->partners[site1]->partners->site[c1->partners->site[site1]] = -1;
@@ -69,7 +112,12 @@ void breakBond(Colloid *c1, int site1){
 	c1->vint += U0;
 }
 
-//For z direction
+/**
+ * Insert a colloid into a dl list sorted by z coordinate
+ *
+ * @param list Entry point into the doubly linked list. May be any colloid in the list
+ * @param newitem Colloid to add to the list
+ */
 void insertSortedZ(Colloid *list, Colloid *newitem){
 	while( list->below && list->below->z > newitem->z ){
 		list=list->below;
@@ -84,6 +132,12 @@ void insertSortedZ(Colloid *list, Colloid *newitem){
 	}
 }
 
+/**
+ * Insert new colloid above given entry point
+ *
+ * @param newitem Colloid to add
+ * @param list newitem will be included above this item
+ */
 void insertAbove(Colloid *list, Colloid *newitem){
 	Colloid *tmp = list->above;
 	list->above = newitem;
@@ -94,6 +148,12 @@ void insertAbove(Colloid *list, Colloid *newitem){
 	}
 }
 
+/**
+ * Insert new colloid below given entry point
+ *
+ * @param newitem Colloid to add
+ * @param list newitem will be included below this item
+ */
 void insertBelow(Colloid *list, Colloid *newitem){
 	Colloid *tmp = list->below;
 	list->below = newitem;
@@ -104,6 +164,11 @@ void insertBelow(Colloid *list, Colloid *newitem){
 	}
 }
 
+/**
+ * Print a list of colloids sorted by z coordinate
+ *
+ * @param list Entry point to the list. May be anywhere in the list
+ */
 void printColloidsSortedZ(Colloid *list){
 	printf("Colloids sorted by z coordinate:\n");
 	while( list->below ){
@@ -122,7 +187,12 @@ void printColloidsSortedZ(Colloid *list){
 	printf("\nTotal Number: %d\n",count);
 }
 
-void reSortZ(Colloid *list, Config *c){ //Point to the changed element!
+/**
+ * Re-Sort a dl list of colloids
+ *
+ * @param list Must point to the changed colloid!
+ */ 
+void reSortZ(Colloid *list){ //Point to the changed element!
 	while( list->above && list->z > list->above->z ){
 		swapUp(list);
 	}
@@ -131,6 +201,9 @@ void reSortZ(Colloid *list, Config *c){ //Point to the changed element!
 	}
 }
 
+/**
+ * Swap the colloid one up
+ */
 void swapUp(Colloid *list){ //assumes there is a particle above
 	Colloid *curAbove = list->above;
 	Colloid *curBelow = list->below;
@@ -142,6 +215,9 @@ void swapUp(Colloid *list){ //assumes there is a particle above
 	curAbove->above = list;
 }
 
+/**
+ * Swap the colloid one down
+ */
 void swapDown(Colloid *list){ //assumes there is a particle below
 	Colloid *curAbove = (*list).above;
 	Colloid *curBelow = (*list).below;
@@ -153,6 +229,17 @@ void swapDown(Colloid *list){ //assumes there is a particle below
 	(*curBelow).below = list;
 }
 
+/**
+ * Calculate bonding energy between two colloids
+ *
+ * Will not update c1 or c2 in any way. Detected bonds go to newp.
+ *
+ * @param c1 Colloid 1
+ * @param c2 Colloid 2
+ * @param collision Pointer to collision indicator (1 = collision, 0 = no collision)
+ * @param newp Pointer to bond storage
+ * @return Returns the bonding energy
+ */
 double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp){
 	double d = colloidDistance(c1,c2);
 	*collision = 0;
@@ -183,10 +270,26 @@ double pairInteraction(Colloid *c1, Colloid *c2, int *collision, Partners *newp)
 	}
 }
 
+/**
+ * Calculate distance between two colloids (center to center)
+ *
+ * @param c1 Colloid 1
+ * @param c2 Colloid 2
+ * @return Returns the distance between the centers
+ */
 double colloidDistance(Colloid *c1, Colloid *c2){
 	return distance(c1->x,c1->z,c2->x,c2->z);
 }
 
+/**
+ * Calculate the x coordinate of a patch
+ *
+ * If patch index is invalid, this will exit the program
+ *
+ * @param c Colloid struct
+ * @param which Which patch? (0,1,2 for threepatch, 0,1 for twopatch)
+ * @return The x coordinate of the patch
+ */
 double patchPositionX(Colloid *c, int which){
 	if( (*c).sp == THREEPATCH ){
 		return (*c).x + sigma/2.0*cos((*c).a + (which%3)*2.0/3.0*M_PI);
@@ -198,6 +301,15 @@ double patchPositionX(Colloid *c, int which){
 	}
 }
 
+/**
+ * Calculate the z coordinate of a patch
+ *
+ * If patch index is invalid, this will exit the program
+ *
+ * @param c Colloid struct
+ * @param which Which patch? (0,1,2 for threepatch, 0,1 for twopatch)
+ * @return The z coordinate of the patch
+ */
 double patchPositionZ(Colloid *c, int which){
 	if( (*c).sp == THREEPATCH ){
 		return (*c).z + sigma/2.0*sin((*c).a + (which%3)*2.0/3.0*M_PI);
@@ -209,6 +321,12 @@ double patchPositionZ(Colloid *c, int which){
 	}
 }
 
+/**
+ * Number of patches on a colloid
+ *
+ * @param c Colloid
+ * @return Number of patches on the colloid
+ */
 int patches(Colloid *c){
 	switch( c->sp ){
 		case THREEPATCH: return 3; break;
@@ -219,6 +337,13 @@ int patches(Colloid *c){
 	}
 }
 
+/**
+ * Detect any collisions between colloids
+ *
+ * @param carray Array of colloids of length c->N
+ * @param c Configuration
+ * @return 0 for no collision, 1 for 1 ore more collisions
+ */
 int collisions(Colloid *carray, Config *c){
 	int i=0,j=0;
 	for(i = 0; i<c->N; ++i){

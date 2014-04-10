@@ -1,3 +1,4 @@
+/** @file */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -10,12 +11,16 @@
 #include "statistics.h"
 #include "monte_carlo.h"
 
-extern FILE *initFile;
-
 void initRandomly(Colloid *, Config*);
 void initBoxed(Colloid *, Config*);
 void initFromFile(Colloid *, Config *);
 
+/**
+ * Wrapper function to handle initialization
+ *
+ * @param particles Array of Colloids (memory must have already been assigned)
+ * @param c Configuration struct
+ */
 void initParticles(Colloid *particles, Config *c){
 	if(c->loadInit){
 		initFromFile(particles, c);
@@ -28,6 +33,14 @@ void initParticles(Colloid *particles, Config *c){
 	printf("initialization done\n");
 }
 
+/**
+ * Initialize the colloids by reading positions from a file
+ * There are no checks to ensure that no collisions occur.
+ * See line 57 for format.
+ *
+ * @param particles Array of colloids, length c->N
+ * @param c Configuration struct
+ */
 void initFromFile(Colloid *particles, Config *c){
 	printf("Initalizing from file\n");
 	FILE *in = fopen(c->initIn,"r");
@@ -64,6 +77,9 @@ void initFromFile(Colloid *particles, Config *c){
 	}
 }
 
+/**
+ * Initialize the colloids by generating random initial positions
+ */
 void initRandomly(Colloid *particles, Config *c){
 	printf("Initalizing randomly\n");
 	int i=0;
@@ -87,6 +103,12 @@ void initRandomly(Colloid *particles, Config *c){
 	}
 }
 
+/**
+ * Initialize the colloids by generating random initial positions in two boxes as defined by c->boxed
+ * c->boxed < 0 means three-patch-particles on top
+ * c->boxed > 0 means two-patch-particles on top
+ * |c->boxed| is always the fraction of height for the lower box
+ */
 void initBoxed(Colloid *particles, Config *c){
 	printf("Initalizing boxed\n");
 	int i=0;
@@ -115,6 +137,13 @@ void initBoxed(Colloid *particles, Config *c){
 	}
 }
 
+/**
+ * Check if no collisions with other particles exis
+ * 
+ * @param i Index of current particle
+ * @param particles Array of colloids, being read up to but not including particles[i]
+ * @param c Configuration struct
+ */
 int noCollision(int i, Colloid *particles, Config *c){
 	double x = particles[i].x;
 	double z = particles[i].z;

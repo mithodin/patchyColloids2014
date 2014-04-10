@@ -160,7 +160,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 		carray[i].x = carray[i].x+c->dmax*(dsfmt_genrand_open_close(&(c->myrand))*2.0-1.0);
 		carray[i].a = fmod(carray[i].a + (2.0*dsfmt_genrand_open_open(&(c->myrand))-1.0)*(c->amax), 2.0*M_PI);
 
-		reSortZ(&carray[i], c);
+		reSortZ(&carray[i]);
 
 		du = deltaU(&carray[i], &duint, &duext, &newp, &collision, c);
 
@@ -168,7 +168,7 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 			carray[i].x = oldx;
 			carray[i].z = oldz;
 			carray[i].a = olda;
-			reSortZ(&carray[i],c);
+			reSortZ(&carray[i]);
 		}else{
 			carray[i].vext += duext;
 			c->Utot += du;

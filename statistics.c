@@ -1,3 +1,4 @@
+/** @file */
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,6 +10,12 @@
 int binIndex(double,double,int);
 void norm(Stats *stat, Config *c);
 
+/**
+ * Create a new Stats struct
+ *
+ * @param bin Number of bins
+ * @return Pointer to the newly created Stats struct
+ */
 Stats *initStats(int bin){
 	Stats *stat = malloc(sizeof(Stats));
 	stat->bins = bin;
@@ -20,7 +27,13 @@ Stats *initStats(int bin){
 	return stat;
 }
 
-void printStats(Colloid *carray, Stats *stat, Config *c){
+/**
+ * Print the collected statistics to c->statOut
+ *
+ * @param stat Pointer to Stats struct. Normalize before printing!
+ * @param c Configuration struct
+ */
+void printStats(Stats *stat, Config *c){
 	norm(stat, c);
 	FILE *statFile = fopen(c->statOut,"w");
 	if( statFile ){
@@ -41,6 +54,13 @@ void printStats(Colloid *carray, Stats *stat, Config *c){
 	fclose(statFile);
 }
 
+/**
+ * Normalize the collected statistics.
+ * Do this only after the simulation is over!
+ *
+ * @param stat Statistics struct
+ * @param c Configuration struct
+ */
 void norm(Stats *stat, Config *c){
 	int i;
 	for(i = 0;i<stat->bins;++i){
@@ -51,12 +71,28 @@ void norm(Stats *stat, Config *c){
 	}
 }
 
+/**
+ * Calculate the correct bin for a z coordinate
+ *
+ * @param z z Coordinate
+ * @param height Height of the simulation box
+ * @param bins Number of bins
+ * @return Index of correct bin
+ */
 int binIndex(double z, double height, int bins){
 	int i = (int)(z/height*bins);
 	i = i < bins ? i : bins-1;
 	return i;
 }
 
+/**
+ * Update the density array
+ *
+ * @param z z Coordinate of current particle
+ * @param kind Which species does the particle belong to
+ * @param c Configuration struct
+ * @param stat Statistics struct
+ */
 void updateDensity(double z, species kind, Config *c, Stats *stat){
 	int i = binIndex(z,c->height,stat->bins);
 	switch(kind){
@@ -69,6 +105,15 @@ void updateDensity(double z, species kind, Config *c, Stats *stat){
 	}
 }
 
+/**
+ * Update the bonds array
+ *
+ * @param z z Coordinate of current particle
+ * @param val How many bonds does the particle have
+ * @param kind Which species does the particle belong to
+ * @param c Configuration struct
+ * @param stat Statistics struct
+ */
 void updateF(double z, double val, species kind, Config *c, Stats *stat){
 	int i = binIndex(z,c->height,stat->bins);
 	switch(kind){
