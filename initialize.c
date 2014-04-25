@@ -14,6 +14,7 @@
 void initRandomly(Colloid *, Config*);
 void initBoxed(Colloid *, Config*);
 void initFromFile(Colloid *, Config *);
+void thermalize(Colloid *, Config *);
 
 /**
  * Wrapper function to handle initialization
@@ -26,11 +27,30 @@ void initParticles(Colloid *particles, Config *c){
 		initFromFile(particles, c);
 	}else if(c->boxed == 0){
 		initRandomly(particles, c);
+		thermalize(particles, c);
 	}else{
 		initBoxed(particles,c);
+		thermalize(particles, c);
 	}
 	c->Utot = totalEnergy(particles, c);
 	printf("initialization done\n");
+}
+
+/**
+ * Thermalize a random/boxed initial state
+ *
+ * @param particles Array of Colloids
+ * @param c Configuration struct
+ */
+void thermalize(Colloid *particles, Config *c){
+	double g = c->g, T = c->T;
+	c->g = 0;
+	c->T = 0.5;
+	c->dmax = 5e-1;
+	c->amax = 1.0;
+	monteCarloSteps(particles, 10000, c, NULL, NULL);
+	c->g = g;
+	c->T = T;
 }
 
 /**
