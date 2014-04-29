@@ -21,7 +21,7 @@ int getRandomSeed(void);
  * @param params Pointer to Config struct. Make sure to initialize correctly (see load_config.c)
  */
 void *newThread(void *params){
-	printf("I'm alive!\n");
+	//printf("I'm alive!\n");
 	Config *c = (Config *)params;
 	dsfmt_init_gen_rand(&(c->myrand),getRandomSeed()); //initialize the rng
 	FILE *out = fopen(c->out,"w");
@@ -31,6 +31,7 @@ void *newThread(void *params){
 		pthread_exit((void *)1);
 	}else{
 		fprintf(out,"Thread alive\n");
+		fprintf(out,"#N = %d\nN1 = %d\nN2 = %d\nU0 = %f\nM1 = %f\nM2 = %f\nheight = %f\nwidth = %f\ng = %f\tT = %f\nSteps = %d\n",c->N,c->N1,c->N2,U0,M1,c->M2,c->height,c->width,c->g,c->T,c->steps);
 		fflush(out);
 	}
 	Colloid *particles = (Colloid *)malloc(sizeof(Colloid)*(c->N));

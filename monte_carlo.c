@@ -14,7 +14,7 @@
 #define maxspan 10
 
 const double paccept = 0.2;
-const double angularPaccept = 0.4;
+const double angularPaccept = 0.44;
 const double maxEnergyDeviation = 5e-3;
 const double maxAccDeviation = 1e-2;
 const double defaultDmax = 1e-1;
