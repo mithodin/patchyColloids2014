@@ -233,7 +233,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 		for(k = 0; k < onePerc; ++k){
 			if ( j%100 == 0 ){
 				p+=monteCarloStep(carray,c,stats);
-				if ( stats && j%500 == 0 ){
+				if ( stats && j%2000 == 0 ){
 					printMovie(movieFile,carray,c);
 					printEnergy(energyFile,c,j);
 				}
