@@ -198,7 +198,8 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	char movieFile[60];
 	char energyFile[60];
 	if ( stats ){
-		sprintf(movieFile,"movie-%s",c->posOut);
+		int len = (int)(strchr(c->posOut,'.')-c->posOut);
+		sprintf(movieFile,"movie-%*.*s.xyz",len,len,c->posOut);
 		sprintf(energyFile,"energy-%s",c->statOut);
 	}
 	if(c->simRate != 0){
