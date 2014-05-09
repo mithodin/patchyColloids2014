@@ -16,7 +16,7 @@ stepsize = int(argv[1])
 datei = argv[2]
 densities = []
 density = array([])
-height = 250
+height = 200
 width = 100
 binheight = 1
 N = 0
@@ -48,7 +48,7 @@ for zeile in dateistream:
 	if(state == "end"):
 		break;
 
-if(steps != stepsize):
+if(steps != 0):
 	density2 = densities[len(densities)-1]
 	density2[0] = array(map(add,density2[0],density[0]))
 	density2[1] = array(map(add,density2[1],density[1]))
