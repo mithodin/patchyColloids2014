@@ -108,15 +108,15 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		}
 		if(x != -1){
 			if(x < 0 || x > 1){
-				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Invalid x. Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}
 			if(N1+N2 == -2){
 				N1 = N*x;
-				N2 = N*(1-x);
+				N2 = N-N1;
 			}else if(N+N1 == -2){
 				if(x >= 1){
-					printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+					printf("Invalid x for given N2. Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 					return 0;
 				}else{
 					N1 = (1.0/(1.0-x)-1.0)*N2;
@@ -127,30 +127,30 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 		}
 		if(N == -1){
 			if(N1 < 0 || N2 < 0){
-				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Invalid N1 or N2. Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N = N1+N2;
 			}
 		}else if(N1 == -1){
 			if(N2 < 0 || N < N2){
-				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Invalid N2 or N. Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N1 = N-N2;
 			}
 		}else if(N2 == -1){
 			if(N < N1){
-				printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+				printf("Invalid N (<N1). Need valid values for at least two of N,N1,N2,x. Aborting.\n");
 				return 0;
 			}else{
 				N2 = N-N1;
 			}
 		}else if(N != N1+N2){
-			printf("Need valid values for at least two of N,N1,N2,x. Aborting.\n");
+			printf("Incorrect sum (N1+N2 != N) (N1 = %d, N2 = %d). Need valid values for at least two of N,N1,N2,x. Aborting.\n",N1,N2);
 			return 0;
 		}
-		x = x == -1 ? 1.0*N1/(1.0*N) : x;
+		x = (x == -1 ? 1.0*N1/(1.0*N) : x);
 		if(config_lookup_float(parameters,"M2",&M2) == CONFIG_FALSE){
 			mass2 = config_lookup(parameters,"M2");
 			if(mass2 == NULL){

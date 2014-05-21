@@ -22,6 +22,7 @@ binheight = 1
 N = 0
 steps = 0
 state = "readnum"
+movie_stepsize = 2000
 
 dateistream = open(datei,"r")
 for zeile in dateistream:
@@ -64,6 +65,9 @@ dens[0] = array([float(elem)/float(binheight*width*(stepsize+steps)) for elem in
 dens[1] = array([float(elem)/float(binheight*width*(stepsize+steps)) for elem in dens[1]])
 densities[len(densities)-1] = dens
 
+output = open("time-density.dat","w")
+output.write("#MC Step (lower)\tz (lower)\trho1\trho2\n")
 for i,dens in enumerate(densities):
-	savetxt("sp0-{index}.dat".format(index=i),dens[0])
-	savetxt("sp1-{index}.dat".format(index=i),dens[1])
+	for j in range(len(dens[0])):
+		output.write("{:d}\t{:.1f}\t{:.5e}\t{:.5e}\n".format(i*movie_stepsize*stepsize,j*binheight,dens[0][j],dens[1][j]))
+output.close()
