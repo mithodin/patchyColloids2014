@@ -4,7 +4,23 @@
  *
  * Bachelor's Thesis by Lucas Treffenstädt
  *************************************************/
-/** @file */
+/*! \mainpage Patchy Colloids in a Gravitational Field
+ *
+ * \section intro Bachelor Thesis by Lucas Treffenstädt
+ * This is the documentation of the program patchy_main. Starting at 'Files' is maybe the best.
+ * \section build How to build
+ * - Install libconfig development files (libconfig-dev package for debian)
+ * - Install cmake
+ * - Create a directory 'build' within this source directory
+ * - Descend into 'build' and execute 'cmake ..'
+ * - Then execute 'make'\n
+ *
+ * You should now have an executable 'patchy_main' in the 'bin' folder.
+ * \section Usage
+ * - Edit the file 'bin/parameters.cfg'
+ * - cd into 'bin'
+ * - Run program using './patchy_main x' (Where x is the number of concurrent threads to run)
+ */
 
 #include <math.h>
 #include <stdio.h>

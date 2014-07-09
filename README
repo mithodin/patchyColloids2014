@@ -1,3 +1,7 @@
+How to build and view the documentation:
+ * in the main folder, run 'doxygen doxy.conf'
+ * open in your browser 'doc/html/index.html'
+
 How to build:
  * Install libconfig development files (libconfig-dev package for debian)
  * Install cmake
@@ -6,5 +10,8 @@ How to build:
  * Then execute 'make'
 
 You should now have an executable 'patchy_main' in the 'bin' folder.
-Usage: ./patchy_main x
-Where x is the number of concurrent threads to run
+
+Usage:
+ * Edit the file 'bin/parameters.cfg'
+ * cd into 'bin'
+ * execute ./patchy_main x (Where x is the number of concurrent threads to run)
