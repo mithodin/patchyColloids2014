@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include "config.h"
-#include "random.h"
 #include "parameters.h"
 #include "colloid.h"
 #include "distance.h"
 #include "initialize.h"
 #include "statistics.h"
 #include "monte_carlo.h"
+#import "dSFMT/dSFMT.h"
 
 void initRandomly(Colloid *, Config*);
 void initBoxed(Colloid *, Config*);
@@ -163,6 +163,7 @@ void initBoxed(Colloid *particles, Config *c){
  * @param i Index of current particle
  * @param particles Array of colloids, being read up to but not including particles[i]
  * @param c Configuration struct
+ * @return 1 if there are no collisions, 0 otherwise
  */
 int noCollision(int i, Colloid *particles, Config *c){
 	double x = particles[i].x;

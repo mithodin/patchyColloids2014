@@ -4,6 +4,7 @@
  *
  * Bachelor's Thesis by Lucas Treffenstädt
  *************************************************/
+/** @file */
 
 #include <math.h>
 #include <stdio.h>
@@ -12,7 +13,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include "random.h" 	//Generating random numbers
+#include "dSFMT/dSFMT.h" 	//Generating random numbers
 #include "config.h"
 #include "colloid.h" 	//What is a colloid?
 #include "statistics.h"
@@ -22,16 +23,22 @@
 #include "threaded.h"
 #include "dSFMT/dSFMT.h"
 
-config_t *parameters;	//holds the parameters for our simulation
-Colloid *particles;	//holds all the particles
+config_t *parameters;	/**< holds the parameters for our simulation */
+Colloid *particles;	/**< holds all the particles */
 
 //PARAMS
-const double M1 = 1;
-const double U0 = 1;
-const double delta = 0.11965683746373795115; //Patch diameter
-const double sigma = 1.0; //Colloid diameter
+const double M1 = 1; /**< Mass of species 1 */
+const double U0 = 1; /**< Bonding energy */
+const double delta = 0.11965683746373795115; /**< Patch diameter */
+const double sigma = 1.0; /**< Colloid diameter */
 // END PARAMS
 
+/**
+ * Main function of the program.
+ * @param argc Number of arguments
+ * @param argv Array of command line arguments (length argc)
+ * @return 0 if program exited successfully
+ */
 int main(int argc, char** argv){
 	int maxThreads = 1;
 	pthread_t *threads;

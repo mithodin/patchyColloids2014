@@ -10,7 +10,7 @@
 #include "parameters.h"
 #include "monte_carlo.h"
 #include "initialize.h"
-#include "random.h"
+#import "dSFMT/dSFMT.h"
 
 void printPositions(Colloid *, double, Config *);
 int getRandomSeed(void);

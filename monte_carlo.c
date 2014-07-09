@@ -1,3 +1,4 @@
+/** @file */
 #include <math.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -9,22 +10,30 @@
 #include "monte_carlo.h"
 #include "parameters.h"
 #include "distance.h"
-#include "random.h"
+#import "dSFMT/dSFMT.h"
 
+/**how many steps to average over (see initDmax, avg) */
 #define maxspan 10
 
-const double paccept = 0.2;
-const double angularPaccept = 0.44;
-const double maxEnergyDeviation = 5e-3;
-const double maxAccDeviation = 1e-2;
-const double defaultDmax = 1e-1;
-const double defaultAmax = 1e-1*2.0/3.0*M_PI;
+const double paccept = 0.2; /**< desired acceptance rate */
+const double angularPaccept = 0.44; /**< desired acceptance rate (rotation only) */
+const double maxEnergyDeviation = 5e-3; /**< maximum deviation of the current total energy from the average energy of the last [maxspan] runs (see initDmax) */
+const double maxAccDeviation = 1e-2; /**< maximum deviation of the actual acceptance rate vs. the desired acceptance rate */
+const double defaultDmax = 1e-1; /**< starting value for maximum displacement */
+const double defaultAmax = 1e-1*2.0/3.0*M_PI; /**< starting value for maximum rotation */
 
 double avg(double *, int);
 void printMovie(char *, Colloid *, Config *);
 void printEnergy(char *, Config *, int);
 void updateUint(Colloid *, Partners *);
 
+/**
+ * Calculate the external potential of a given colloid
+ * @param colloid a pointer to the colloid struct
+ * @param collision a pointer to the collision flag. Will be set to 1 if the colloid collides with the wall.
+ * @param c pointer to configuration struct.
+ * @return the external energy of the colloid
+ */
 double extPotential(Colloid *colloid, int *collision, Config *c){
 	*collision = 0;
 	if( colloid->z < 0.5 || colloid->z > c->height-0.5 || colloid->x < 0.5 || colloid->x > c->width-0.5 ){
@@ -34,6 +43,13 @@ double extPotential(Colloid *colloid, int *collision, Config *c){
 	return colloid->z*(colloid->sp == THREEPATCH ? M1 : c->M2)*c->g;
 }
 
+/**
+ * Calculate the internal energy of a given colloid
+ * @param particle pointer to the colloid struct
+ * @param collision pointer to the collision flag. Will be set to 1 if the colloid collides with another one.
+ * @param newp pointer to Partners struct. Will contain the new bonding partners (Colloid is not updated automatically to simplify reverting a rejected move.).
+ * @return the internal energy of the colloid.
+ */
 double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	clearPartners(newp);
 	Colloid *partner = particle;
@@ -63,6 +79,11 @@ double pairPotential(Colloid *particle, int *collision, Partners *newp){
 	return u;
 }
 
+/**
+ * Find a reasonable value for the maximum displacement and maximum rotation. This could take a long time!
+ * @param carray Array of colloids, length c->N
+ * @param c Configuration struct
+ */
 void initDmax(Colloid *carray, Config *c){
 	c->dmax = defaultDmax;
 	c->amax = defaultAmax;
@@ -112,6 +133,12 @@ void initDmax(Colloid *carray, Config *c){
 	fclose(out);
 }
 
+/**
+ * Calculate the current total energy of the system
+ * @param carray Array of colloids, length c->N
+ * @param c Configuration struct
+ * @return the total energy of the system
+ */
 double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	double utot = 0;
 	c->Uext = 0;
@@ -130,6 +157,11 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	return utot;
 }
 
+/**
+ * Calculate and update the internal energy of a colloid. Updates the Partners struct of the Colloid as well.
+ * @param c colloid to be updated
+ * @param newp Partners struct with current bonding partners
+ */
 void updateUint(Colloid *c, Partners *newp){
 	int i;
 	for(i = 0; i < patches(c); ++i){
@@ -144,6 +176,13 @@ void updateUint(Colloid *c, Partners *newp){
 	}
 }
 
+/**
+ * Execute one Monte Carlo step. Do not use directly unless necessary.
+ * @param carray Array of colloids, length c->N
+ * @param c configuration struct
+ * @param stats statistics struct
+ * @return the acceptance rate
+ */
 double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns acceptance rate
 	double p=0;
 	double oldx = 0, oldz = 0, olda = 0;
@@ -191,6 +230,15 @@ double monteCarloStep(Colloid *carray, Config *c, Stats *stats){ //returns accep
 	return p/(c->N);
 }
 
+/**
+ * Execute multiple Monte Carlo steps
+ * @param carray Array of colloids, length c->N
+ * @param howmany How many MC steps to execute
+ * @param c Configuration struct
+ * @param stats Statistics struct
+ * @param out File stream to use for logging output. NULL for no output.
+ * @return the acceptance rate
+ */
 double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FILE *out){ //return acceptance rate
 	bool verbose = false;
 	double p=0;
@@ -278,6 +326,12 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 	return p/howmany;
 }
 
+/**
+ * Accept or reject a MC move based on energy difference
+ * @param du the energy difference (signed!)
+ * @param c configuration struct
+ * @return 1 if move is accepted, 0 otherwise
+ */
 int accept(double du, Config *c){
 	if( du < 0 ) return 1;
 	else{
@@ -287,6 +341,16 @@ int accept(double du, Config *c){
 	}
 }
 
+/**
+ * Calculate the energy difference for a trial move
+ * @param colloid The colloid that has been moved
+ * @param duint Pointer to the internal energy difference
+ * @param duext Pointer to the external energy difference
+ * @param newp Partners struct, will contain the new bonding partners
+ * @param collision Pointer to collision flag. Will be set to 1 if collision occurs, 0 otherwise
+ * @param c configuration struct
+ * @return the total energy difference
+ */
 double deltaU(Colloid *colloid, double *duint, double *duext, Partners *newp, int *collision, Config *c){
 	*collision = 0;
 	*duext = extPotential(colloid,collision,c) - colloid->vext;
@@ -295,6 +359,12 @@ double deltaU(Colloid *colloid, double *duint, double *duext, Partners *newp, in
 	return *duint+*duext;
 }
 
+/**
+ * Calculate the average over [maxspan] items, ending at index
+ * @param array an array of doubles. Who would have guessed?
+ * @param index index of the LAST item to average over.
+ * @return the average
+ */
 double avg(double *array, int index){
 	int span = (index+1)>maxspan ? maxspan : index+1;
 	int i = 0;
@@ -305,6 +375,12 @@ double avg(double *array, int index){
 	return avg/span;
 }
 
+/**
+ * Write the coordinates of all colloids to a file.
+ * @param movieFile name of the file to use
+ * @param particles array of colloids, length c->N
+ * @param c configuration struct
+ */
 void printMovie(char *movieFile, Colloid *particles, Config *c){
 	FILE *file = fopen(movieFile,"a");
 	fprintf(file,"%d\n",c->N);
@@ -316,6 +392,12 @@ void printMovie(char *movieFile, Colloid *particles, Config *c){
 	fclose(file);
 }
 
+/**
+ * print the current total, external, and internal energy to a file.
+ * @param energyFile the name of the file to use
+ * @param c Configuration struct
+ * @param step Current Monte Carlo step index
+ */
 void printEnergy(char *energyFile, Config *c, int step){
 	FILE *file = fopen(energyFile,"a");
 	fprintf(file,"%d\t%e\t%e\t%e\n",step,c->Utot,c->Uext,c->Uint);

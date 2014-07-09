@@ -1,3 +1,7 @@
+/**
+ * @file monte_carlo.h
+ * @brief Defines all the functions for the Monte Carlo simulation
+ */
 double extPotential(Colloid *, int*, Config *);
 double pairPotential(Colloid *, int*, Partners *);
 double totalEnergy(Colloid *, Config*);
