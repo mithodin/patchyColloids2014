@@ -4,6 +4,7 @@
  *
  * Bachelor's Thesis by Lucas Treffenstädt
  *************************************************/
+/** @file */
 /*! \mainpage Patchy Colloids in a Gravitational Field
  *
  * \section intro Bachelor Thesis by Lucas Treffenstädt
