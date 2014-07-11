@@ -23,7 +23,7 @@ const double defaultDmax = 1e-1; /**< starting value for maximum displacement */
 const double defaultAmax = 1e-1*2.0/3.0*M_PI; /**< starting value for maximum rotation */
 
 double avg(double *, int);
-void printMovie(char *, Colloid *, Config *);
+void printMovie(char *, Colloid *, Config *, int);
 void printEnergy(char *, Config *, int);
 void updateUint(Colloid *, Partners *);
 
@@ -283,7 +283,7 @@ double monteCarloSteps(Colloid *carray, int howmany, Config *c, Stats *stats, FI
 			if ( j%100 == 0 ){
 				p+=monteCarloStep(carray,c,stats);
 				if ( stats && j%2000 == 0 ){
-					printMovie(movieFile,carray,c);
+					printMovie(movieFile,carray,c,j);
 					printEnergy(energyFile,c,j);
 				}
 			}else{
@@ -380,14 +380,15 @@ double avg(double *array, int index){
  * @param movieFile name of the file to use
  * @param particles array of colloids, length c->N
  * @param c configuration struct
+ * @param mcstep monte carlo step index
  */
-void printMovie(char *movieFile, Colloid *particles, Config *c){
+void printMovie(char *movieFile, Colloid *particles, Config *c, int mcstep){
 	FILE *file = fopen(movieFile,"a");
 	fprintf(file,"%d\n",c->N);
-	fprintf(file,"frame\n");
+	fprintf(file,"frame%d\n",mcstep);
 	int i;
 	for(i=0;i<c->N;++i){
-		fprintf(file,"%s\t%f\t%f\t0\n",particles[i].sp == THREEPATCH?"C":"N",particles[i].x,particles[i].z);
+		fprintf(file,"%s\t%f\t%f\t%f\n",particles[i].sp == THREEPATCH?"C":"N",particles[i].x,particles[i].z,particles[i].a);
 	}
 	fclose(file);
 }
