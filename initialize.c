@@ -134,7 +134,7 @@ void initBoxed(Colloid *particles, Config *c){
 	int i=0;
 	Colloid *this=NULL;
 	double box = c->boxed > 0 ? c->boxed : 1+c->boxed;
-	double offset = c->boxed > 0 ? 0:fabs(c->boxed*c->height);
+	double offset = c->boxed > 0 ? 0:-1.0*c->boxed*c->height;
 	
 	species sp = THREEPATCH;
 	while(i<c->N){

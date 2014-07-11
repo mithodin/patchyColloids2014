@@ -15,12 +15,49 @@
  * - Create a directory 'build' within this source directory
  * - Descend into 'build' and execute 'cmake ..'
  * - Then execute 'make'\n
- *
+ * \n
  * You should now have an executable 'patchy_main' in the 'bin' folder.
  * \section Usage
- * - Edit the file 'bin/parameters.cfg'
+ * - Edit the file 'bin/parameters.cfg' (see: Parameters)
  * - cd into 'bin'
  * - Run program using './patchy_main x' (Where x is the number of concurrent threads to run)
+ * \n
+ * \section params Parameters
+ * How to use parameters.cfg
+ * \subsection General Syntax
+ * &lt;name&gt; = &lt;value&gt;\n
+ * where &lt;value&gt; can be a single value (integer, float, string)
+ * - float always requires a decimal point! Example: 1.0
+ * - integer ist just any integer number. Example: 500
+ * - string must be put in single or double quotes. Example: "file.dat"
+ * some values can also be arrays. An array starts with a square bracket [ and ends with one ]. Values are comma separated. Example: [1.0, 2.0, 3.0]. Single values are not allowed!
+ * \subsection vars Variables
+ * - \b N: (integer, array) Total number of particles
+ * - \b N1, \b N2: (integer) Number of species 1/2
+ * - \b x: (float, array) Composition (molar fraction of species 1)
+ * - \b height: (float) Height of the simulation box
+ * - \b width: (float) Width of the simulation box
+ * - \b T: (float, array) Temperature of the simulation
+ * - \b steps: (integer) Number of Monte Carlo steps to run
+ * - \b g: (float) Gravitational constant
+ * - \b init: (string) Initial configuration
+ * 	- "random": random configuration. Will be thermalized
+ * 	- "boxed": random configuration, but all species 1 in one part and species 2 in the other part of the box. See "sep". Will be thermalized.
+ * 	- "file": load configuration from a file. Will not be thermalized
+ * - \b initfile: (string) if init is set to "file", read initial configuration from this file.
+ * - \b sep: (float) if init is set to "boxed", this sets the splitting of the simulation box. If positive, species 2 is on top. If negative, species 1 is on top. |sep| is the fraction of height of the lower box.
+ * \subsection example Example:
+ * <CODE>
+ * N = 5000\n
+ * x = 0.6\n
+ * M2 = -4.12\n
+ * height= 200.0\n
+ * width= 100.0\n
+ * T = 0.1\n
+ * steps = 5000\n
+ * init = "random"\n
+ * g = 0.005\n
+ * </CODE>
  */
 
 #include <math.h>
