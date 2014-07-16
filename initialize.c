@@ -71,7 +71,7 @@ void initFromFile(Colloid *particles, Config *c){
 		char discard[400];
 		fgets(discard,400,in);
 		fgets(discard,400,in);
-		//Discard first two lines.
+		//Discard first two lines, they contain comments only.
 		int i,s;
 		for(i = 0;i<c->N;++i){
 			if(fscanf(in,"%lf %lf %lf %d",&(particles[i].x),&(particles[i].z),&(particles[i].a),&s) == 4){;
@@ -94,6 +94,7 @@ void initFromFile(Colloid *particles, Config *c){
 				exit(1);
 			}
 		}
+		totalEnergy(particles,c); //We need this to have the correct bonds and energies.
 	}
 }
 
