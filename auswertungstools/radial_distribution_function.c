@@ -24,14 +24,14 @@ int bin_index(double r){
 }
 
 int main(int argc, char **argv){
-	cutoff = min(height,width)/2.0;
-	int bins=(int)ceil(cutoff/binwidth);
-	density = (double *)calloc(bins,sizeof(double));
-	int i=0,j=0;
 	if(argc > 1){
+		cutoff = min(height,width)/2.0;
+		int bins=(int)ceil(cutoff/binwidth);
+		density = (double *)calloc(bins,sizeof(double));
+		int i=0,j=0;
 		FILE *datei=fopen(argv[1],"r");
-		size_t len = 0;
-		char *zeile;
+		size_t len = 50;
+		char *zeile=calloc(50,sizeof(char));
 		char species;
 		double discard;
 		double dx,dz,r;
@@ -70,8 +70,12 @@ int main(int argc, char **argv){
 						file_state=READNUM;
 					}
 					break;
+				default:
+					printf("An unexpected thing occured\n");
+					break;
 			}
 		}
+		free(zeile);
 		fclose(datei);
 		double norm;
 		for(i=0;i<bins;++i){
@@ -84,6 +88,7 @@ int main(int argc, char **argv){
 		for(i=0;i<bins;++i){
 			fprintf(output,"%d\t%.2f\t%.5e\n",i,(i+0.5)*binwidth,density[i]);
 		}
+		free(density);
 		fclose(output);
 	}else{
 		printf("Give me a filename!\n");
