@@ -14,6 +14,13 @@ plot datafile u 1:2 i 0 smooth csplines title "3 patches" lc 3,\
      datafile u 1:3 i 0 smooth csplines title "2 patches" lc 1,\
      datafile u 1:3:(0.2) i 0 w circles notitle lc 1 fs solid
 
+set output prefix."totaldensity".number.".png"
+
+set xlabel "z Coordinate"
+set ylabel "total number density"
+plot datafile u 1:($2+$3) i 0 smooth csplines notitle lc 3,\
+     datafile u 1:($2+$3):(0.2) i 0 w circles notitle lc 3 fs solid
+
 set output prefix."bonds".number.".png"
 
 set xlabel "z Coordinate"
