@@ -88,8 +88,8 @@ int main(int argc, char **argv){
 		totalpatches = (int *)calloc(bins,sizeof(int));
 		int i=0,j=0;
 		FILE *datei=fopen(argv[1],"r");
-		size_t len = 50;
-		char *zeile=calloc(50,sizeof(char));
+		size_t len = 80;
+		char *zeile=calloc(80,sizeof(char));
 		char sp0;
 		double dx,dz;
 		while(getline(&zeile,&len,datei) != -1){
@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 					break;
 			}
 		}
-		free(zeile);
+		//free(zeile);
 		fclose(datei);
 		for(i=0;i<bins;++i){
 			pbond[i]/=totalpatches[i];
@@ -150,9 +150,9 @@ int main(int argc, char **argv){
 		for(i=0;i<bins;++i){
 			fprintf(output,"%d\t%.2f\t%.5e\n",i,(i+0.5)*binheight,pbond[i]);
 		}
-		free(pbond);
-		free(totalpatches);
 		fclose(output);
+		//free(pbond);
+		free(totalpatches);
 	}else{
 		printf("Give me a filename!\n");
 	}
