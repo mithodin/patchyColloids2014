@@ -125,7 +125,7 @@ int main(int argc, char **argv){
 					}
 					totalpatches[bin_index(z[i])]+=patches(sp[i]);
 					for(j=0;j<i;++j){
-						pbond[bin_index(z[i])]+=bonds(i,j);
+						pbond[bin_index(z[i])]+=2*bonds(i,j);
 					}
 					++i;
 					if(i==N){
