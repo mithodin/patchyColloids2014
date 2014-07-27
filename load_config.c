@@ -22,6 +22,10 @@ double x; /**< store last composition */
 double lastT/** store static configurations */,lastM2/** store static configurations */,lastG/** store static configurations */,lastX/** store static configurations */,lastWidth/** store static configurations */,lastHeight/** store static configurations */,boxed; /**< store static configurations */
 int lastN/** store static configurations */,lastSteps; /**< store static configurations */
 const char **infile; /**< filename of initialization file */
+double c_amax = 0; /**< maximum angle of rotation  (use only if loading from another simulation) */
+double c_dmax = 0; /**< maximum displacement (use only if loading from another simulation) */
+
+extern bool initdmax; /**< initialize amax and dmax? */
 
 
 /**
@@ -172,6 +176,17 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 			}
 		}else{ g_length = 1; }
 
+		if(config_lookup_float(parameters,"dmax",&c_dmax) == CONFIG_FALSE){
+			initdmax = true;
+		}else{
+			if(config_lookup_float(parameters,"amax",&c_dmax) == CONFIG_FALSE){
+				initdmax = true;
+				printf("Notice: no amax given, using standard initDmax\n");
+			}else{
+				initdmax = false;
+			}
+		}
+
 		if(config_lookup_float(parameters,"height",&height) == CONFIG_FALSE){
 			printf("No valid value found for height. Aborting.\n");
 			return 0;
@@ -229,6 +244,8 @@ int loadParams(Config **c){ //We are relying on the fact that params is a valid 
 	(*c)->g = g;
 	(*c)->simRate = 0;
 	(*c)->boxed = boxed;
+	(*c)->dmax = c_dmax;
+	(*c)->amax = c_amax;
 	if( infile == NULL ){
 		(*c)->loadInit = false;
 	}else{

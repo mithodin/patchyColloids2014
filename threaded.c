@@ -15,6 +15,8 @@
 void printPositions(Colloid *, double, Config *);
 int getRandomSeed(void);
 
+bool initdmax = true; /**< initialize amax and dmax? */
+
 /**
  * Spawns a new thread with given parameters
  *
@@ -48,7 +50,9 @@ void *newThread(void *params){
 	c->dmax = 5e-2;
 	c->amax = 5e-1;
 	#else
-	initDmax(particles,c); //initialize maximum displacement and rotation
+	if(initdmax){
+		initDmax(particles,c); //initialize maximum displacement and rotation
+	}
 	#endif
 	
 	out = fopen(c->out,"a");
