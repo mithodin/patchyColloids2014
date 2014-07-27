@@ -125,7 +125,9 @@ int main(int argc, char **argv){
 					}
 					totalpatches[bin_index(z[i])]+=patches(sp[i]);
 					for(j=0;j<i;++j){
-						pbond[bin_index(z[i])]+=2*bonds(i,j);
+						tmp=bonds(i,j);
+						pbond[bin_index(z[i])]+=tmp;
+						pbond[bin_index(z[j])]+=tmp;
 					}
 					++i;
 					if(i==N){
@@ -142,7 +144,9 @@ int main(int argc, char **argv){
 		//free(zeile);
 		fclose(datei);
 		for(i=0;i<bins;++i){
-			pbond[i]/=totalpatches[i];
+			if(totalpatches[i]>0){
+				pbond[i]/=totalpatches[i];
+			}
 		}
 
 		FILE *output=fopen("pbond.dat","w");
