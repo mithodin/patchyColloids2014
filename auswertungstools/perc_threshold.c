@@ -86,7 +86,7 @@ int main(int argc, char **argv){
 		int bins=(int)ceil(height/binheight);
 		pbond = (double *)calloc(bins,sizeof(double));
 		totalpatches = (int *)calloc(bins,sizeof(int));
-		int i=0,j=0;
+		int i=0,j=0,tmp=0;
 		FILE *datei=fopen(argv[1],"r");
 		size_t len = 80;
 		char *zeile=calloc(80,sizeof(char));
