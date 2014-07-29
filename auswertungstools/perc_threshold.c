@@ -6,7 +6,7 @@
 //MAKE SURE HEIGHT IS A MULTIPLE OF BINHEIGHT!
 #define BINHEIGHT 2
 #define HEIGHT 200
-#define NUM_BINS HEIGHT/BINHEIGHT
+#define NUM_BINS (HEIGHT/BINHEIGHT)
 
 typedef enum{READ_NUMBER,READ_PARTICLE,SKIP_ONE,ERROR,END_OF_FRAME} file_state;
 
@@ -18,10 +18,12 @@ double *x=NULL;
 double *z=NULL;
 double *patch_x[3]={NULL};
 double *patch_z[3]={NULL};
-unsigned short int *patches;
-unsigned int *bin;
+unsigned short int *patches=NULL;
+unsigned int *bin=NULL;
 long double bin_bonds[NUM_BINS]={0.0};
 unsigned long int bin_patches[NUM_BINS]={0};
+long double bin_composition[NUM_BINS]={0.0};
+unsigned long int bin_n[NUM_BINS]={0.0};
 const double sigma = 1.0;
 const double delta = 0.11965683746373795115;
 //----------------
@@ -76,11 +78,17 @@ int main(int argc, char **argv){
 			}else{
 				printf("%lu patches in bin %d\n",bin_patches[i],i);
 			}
+			if(bin_n[i]>0){
+				bin_composition[i]/=bin_n[i];
+			}else{
+				printf("%lu particles in bin %d\n",bin_n[i],i);
+			}
 		}
 		printf("writing..."); fflush(stdout);
 		FILE *output=fopen("pbonds.dat","w");
+		fprintf(output,"#bin index\tz(bin)\tpbond\tcomposition\n");
 		for(i=0;i<NUM_BINS;++i){
-			fprintf(output,"%d\t%lf\t%Lf\n",i,(double)((i+0.5)*BINHEIGHT),bin_bonds[i]);
+			fprintf(output,"%d\t%lf\t%Lf\t%Lf\n",i,(double)((i+0.5)*BINHEIGHT),bin_bonds[i],bin_composition[i]);
 		}
 		fflush(output);
 		fclose(output);
@@ -158,6 +166,10 @@ file_state read_particle(const char *zeile){
 	}
 	bin_patches[bin[current_particle]]+=patches[current_particle];
 	bin_bonds[bin[current_particle]]+=bondsof();
+	bin_n[bin[current_particle]]+=1;
+	if(patches[current_particle]==3){
+		bin_composition[bin[current_particle]]+=1;
+	}
 	if(++current_particle==N) return END_OF_FRAME;
 	else return READ_PARTICLE;
 }
