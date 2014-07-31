@@ -144,12 +144,14 @@ double totalEnergy(Colloid *carray, Config *c){ //Give an Array here!
 	c->Uext = 0;
 	c->Uint = 0;
 	int collision = 0;
+	Partners newp;
 	int i = 0;
 	for(i = 0;i < c->N; ++i){
 		carray[i].vext = extPotential(&carray[i],&collision,c);
-		carray[i].vint = pairPotential(&carray[i],&collision,carray[i].partners);
+		carray[i].vint = pairPotential(&carray[i],&collision,&newp);
 		c->Uext += carray[i].vext;
 		c->Uint += carray[i].vint;
+		updateUint(&carray[i],&newp);
 	}
 	checkAllBonds(carray,c);
 	c->Uint /= 2.0;
