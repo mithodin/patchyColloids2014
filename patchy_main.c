@@ -87,14 +87,17 @@ const double delta = 0.11965683746373795115; /**< Patch diameter */
 const double sigma = 1.0; /**< Colloid diameter */
 // END PARAMS
 
+int maxThreads = 1; /**< Maximum number of concurrent threads */
+
+int getFreeThread(int,volatile int*, pthread_t*);
+
 /**
  * Main function of the program.
  * @param argc Number of arguments
  * @param argv Array of command line arguments (length argc)
- * @return 0 if program exited successfully
+ * @return 0 if program exited successfully, non-zero otherwise
  */
 int main(int argc, char** argv){
-	int maxThreads = 1;
 	pthread_t *threads;
 	volatile int *done;
 
@@ -115,29 +118,10 @@ int main(int argc, char** argv){
 	
 	int index = 0;
 	int realindex = 0;
-	long result = 0;
 	pthread_attr_t at;
 	Config **c = (Config **)malloc(sizeof(Config *));
 	while( ( index = loadParams(c) ) ){
-		if(index > maxThreads){
-			while(1){
-				for(realindex = 0;realindex < maxThreads;++realindex){
-					if(done[realindex]){
-						pthread_join(threads[realindex],(void *)result);
-						if( result ){
-							printf("Warning: Nonzero exit of thread %d\n",realindex);
-						}else{
-							printf("Found finished thread\n");
-						}
-						goto freethreadfound;
-					}
-				}
-				sleep(2);
-			}
-		}else{
-			realindex = index-1;
-		}
-		freethreadfound:
+		realindex=getFreeThread(index,done,threads);
 		(*c)->done = &done[realindex];
 		done[realindex] = 0;
 		sprintf((*c)->out,"%d.stdout",index);
@@ -149,6 +133,7 @@ int main(int argc, char** argv){
 		else printf("Thread %d started.\n",realindex);
 	}
 	int i;
+	long result = 0;
 	for(i = 0;i<maxThreads;++i){
 		pthread_join(threads[i],(void *)result);
 		if( result ) printf("Warning: Nonzero exit of thread %d\n",i);
@@ -156,4 +141,34 @@ int main(int argc, char** argv){
 	}
 	printf("So long and thanks for all the fish...\n");
 	return 0;
+}
+
+/**
+ * Get a new free thread for a simulation
+ * @param paramindex Index of the current parameter set
+ * @param done Array of ints indicating if a given thread has finished and can be joined
+ * @param threads Array of pthreads
+ * @return The index of the next free thread
+ */
+int getFreeThread(int paramindex, volatile int *done, pthread_t *threads){
+	if(paramindex > maxThreads){
+		while(1){
+			int realindex=0;
+			long result=0;
+			for(realindex = 0;realindex < maxThreads;++realindex){
+				if(done[realindex]){
+					pthread_join(threads[realindex],(void *)result);
+					if( result ){
+						printf("Warning: Nonzero exit of thread %d\n",realindex);
+					}else{
+						printf("Found finished thread\n");
+					}
+					return realindex;
+				}
+			}
+			sleep(10); //We can afford to wait 10 seconds.
+		}
+	}else{
+		return paramindex-1;
+	}
 }
