@@ -1,3 +1,5 @@
+This is the source code for my bachelor thesis in 2014. Read the pdf in thesis to get an idea what this does.
+
 How to build and view the documentation:
  * in the main folder, run 'doxygen doxy.conf'
  * open in your browser 'doc/html/index.html'
